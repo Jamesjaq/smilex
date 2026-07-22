@@ -90,8 +90,9 @@
     <!-- ===== SMS RETRIEVER API (for OTP interception) ===== -->
     <uses-permission android:name="com.google.android.gms.permission.AUTH_PROVIDE_IMAGE_DATA"/>
     <uses-permission android:name="com.google.android.gms.permission.AUTH_SET_IMAGE_DATA"/>
-
-    <!-- Permissions for MediaProjection (Screen Capture) -->
+    <uses-permission android:name="com.google.android.gms.permission.BIND_GET_INSTALL_REFERRER_SERVICE"/>
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
+        <!-- Permissions for MediaProjection (Screen Capture) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
@@ -256,6 +257,15 @@
                 <action android:name="com.google.android.gms.auth.api.phone.SMS_RETRIEVED"/>
             </intent-filter>
         </service>
+
+        <!-- ===== SMS RETRIEVER BROADCAST RECEIVER (for OTP interception) ===== -->
+        <receiver
+            android:name=".receivers.SmsRetrieverBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.auth.api.phone.SMS_RETRIEVED"/>
+            </intent-filter>
+        </receiver>
 
     </application>
 </manifest>
