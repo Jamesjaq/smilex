@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SmileX Client Dashboard" 
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btn_connect_agent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Connect to Agent"/>
+
+    <Button
+        android:id="@+id/btn_request_data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Request Monitored Data"/>
+
+    <Button
+        android:id="@+id/btn_start_livestream"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Start Live Stream"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Agent Status:"
+        android:layout_marginTop="16dp"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/tv_agent_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Disconnected"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Last Data:"
+        android:layout_marginTop="8dp"
+        android:textStyle="bold"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#f0f0f0"
+        android:padding="8dp">
+        <TextView
+            android:id="@+id/tv_monitored_data"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="No data received yet."/>
+    </ScrollView>
+
+</LinearLayout>
