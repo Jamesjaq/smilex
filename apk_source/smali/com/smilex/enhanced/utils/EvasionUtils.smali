@@ -72,7 +72,6 @@
     .registers 5
     const/4 v0, 0x0
 
-    # Check Build properties
     sget-object v1, Landroid/os/Build;->FINGERPRINT:Ljava/lang/String;
     const-string v2, "generic"
     invoke-virtual {v1, v2}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
@@ -244,13 +243,319 @@
 .end method
 
 .method public static performZeroClickEvasion()V
-    .registers 0
-    # Placeholder for Zero-Click Evasion logic
+    .registers 8
+    :try_start
+    new-instance v0, Ljava/io/File;
+    const-string v1, "/proc/self/status"
+    invoke-direct {v0, v1}, Ljava/io/File;-><init>(Ljava/lang/String;)V
+    new-instance v1, Ljava/io/BufferedReader;
+    new-instance v2, Ljava/io/FileReader;
+    invoke-direct {v2, v0}, Ljava/io/FileReader;-><init>(Ljava/io/File;)V
+    invoke-direct {v1, v2}, Ljava/io/BufferedReader;-><init>(Ljava/io/Reader;)V
+
+    :read_loop
+    invoke-virtual {v1}, Ljava/io/BufferedReader;->readLine()Ljava/lang/String;
+    move-result-object v0
+    if-eqz v0, :close
+
+    const-string v2, "TracerPid:"
+    invoke-virtual {v0, v2}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+    move-result v2
+    if-eqz v2, :read_loop
+
+    const-string v2, "TracerPid:\t0"
+    invoke-virtual {v0, v2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v2
+    if-nez v2, :debugged
+
+    :close
+    invoke-virtual {v1}, Ljava/io/BufferedReader;->close()V
+    return-void
+
+    :debugged
+    invoke-virtual {v1}, Ljava/io/BufferedReader;->close()V
+
+    new-instance v2, Ljava/io/File;
+    const-string v3, "/proc/self/maps"
+    invoke-direct {v2, v3}, Ljava/io/File;-><init>(Ljava/lang/String;)V
+    new-instance v3, Ljava/io/BufferedReader;
+    new-instance v4, Ljava/io/FileReader;
+    invoke-direct {v4, v2}, Ljava/io/FileReader;-><init>(Ljava/io/File;)V
+    invoke-direct {v3, v4}, Ljava/io/BufferedReader;-><init>(Ljava/io/Reader;)V
+
+    :maps_loop
+    invoke-virtual {v3}, Ljava/io/BufferedReader;->readLine()Ljava/lang/String;
+    move-result-object v4
+    if-eqz v4, :close_maps
+
+    const-string v5, "frida"
+    invoke-virtual {v4, v5}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
+    move-result v5
+    if-nez v5, :xposed
+
+    const-string v5, "xposed"
+    invoke-virtual {v4, v5}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
+    move-result v5
+    if-nez v5, :xposed
+
+    const-string v5, "substrate"
+    invoke-virtual {v4, v5}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
+    move-result v5
+    if-eqz v5, :maps_loop
+
+    :xposed
+    invoke-virtual {v3}, Ljava/io/BufferedReader;->close()V
+    invoke-static {}, Ljava/lang/System;->exit(I)V
+
+    :close_maps
+    invoke-virtual {v3}, Ljava/io/BufferedReader;->close()V
+
+    :try_end
+    .catch Ljava/lang/Exception; {:try_start .. :try_end} :catch
+    :catch
     return-void
 .end method
 
 .method public static performAIPoweredThreatEvasion()V
-    .registers 0
-    # Placeholder for AI-Powered Threat Evasion logic
+    .registers 8
+    :try_start
+    new-instance v0, Ljava/util/Random;
+    invoke-direct {v0}, Ljava/util/Random;-><init>()V
+
+    const/16 v1, 0x3e8
+    invoke-virtual {v0, v1}, Ljava/util/Random;->nextInt(I)I
+    move-result v0
+    int-to-long v0, v0
+    const-wide/16 v2, 0x1
+    add-long/2addr v0, v2
+    invoke-static {v0, v1}, Ljava/lang/Thread;->sleep(J)V
+
+    new-instance v0, Ljava/io/File;
+    const-string v1, "/proc/net/tcp"
+    invoke-direct {v0, v1}, Ljava/io/File;-><init>(Ljava/lang/String;)V
+    new-instance v1, Ljava/io/BufferedReader;
+    new-instance v2, Ljava/io/FileReader;
+    invoke-direct {v2, v0}, Ljava/io/FileReader;-><init>(Ljava/io/File;)V
+    invoke-direct {v1, v2}, Ljava/io/BufferedReader;-><init>(Ljava/io/Reader;)V
+
+    :tcp_loop
+    invoke-virtual {v1}, Ljava/io/BufferedReader;->readLine()Ljava/lang/String;
+    move-result-object v2
+    if-eqz v2, :close_tcp
+
+    const-string v3, ":1F90"
+    invoke-virtual {v2, v3}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
+    move-result v3
+    if-nez v3, :tcp_loop
+
+    const-string v3, ":2710"
+    invoke-virtual {v2, v3}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
+    move-result v3
+    if-eqz v3, :tcp_loop
+
+    invoke-virtual {v1}, Ljava/io/BufferedReader;->close()V
+    invoke-static {}, Ljava/lang/System;->exit(I)V
+
+    :close_tcp
+    invoke-virtual {v1}, Ljava/io/BufferedReader;->close()V
+
+    new-instance v0, Ljava/io/File;
+    const-string v1, "/proc/net/unix"
+    invoke-direct {v0, v1}, Ljava/io/File;-><init>(Ljava/lang/String;)V
+    new-instance v1, Ljava/io/BufferedReader;
+    new-instance v2, Ljava/io/FileReader;
+    invoke-direct {v2, v0}, Ljava/io/FileReader;-><init>(Ljava/io/File;)V
+    invoke-direct {v1, v2}, Ljava/io/BufferedReader;-><init>(Ljava/io/Reader;)V
+
+    :unix_loop
+    invoke-virtual {v1}, Ljava/io/BufferedReader;->readLine()Ljava/lang/String;
+    move-result-object v2
+    if-eqz v2, :close_unix
+
+    const-string v3, "frida"
+    invoke-virtual {v2, v3}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
+    move-result v3
+    if-nez v3, :unix_loop
+
+    const-string v3, "xposed"
+    invoke-virtual {v2, v3}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
+    move-result v3
+    if-eqz v3, :unix_loop
+
+    invoke-virtual {v1}, Ljava/io/BufferedReader;->close()V
+    invoke-static {}, Ljava/lang/System;->exit(I)V
+
+    :close_unix
+    invoke-virtual {v1}, Ljava/io/BufferedReader;->close()V
+
+    :try_end
+    .catch Ljava/lang/Exception; {:try_start .. :try_end} :catch
+    :catch
+    return-void
+.end method
+
+.method public static disableSamsungAutoStart(Landroid/content/Context;)V
+    .registers 4
+    invoke-static {}, Lcom/smilex/enhanced/utils/EvasionUtils;->getManufacturer()Ljava/lang/String;
+    move-result-object v0
+    const-string v1, "samsung"
+    invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v0
+    if-eqz v0, :return
+    :try_start
+    new-instance v0, Landroid/content/Intent;
+    const-string v1, "android.intent.action.MAIN"
+    invoke-direct {v0, v1}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
+    const-string v1, "com.samsung.android.lool"
+    const-string v2, "com.samsung.android.sm.battery.ui.BatteryActivity"
+    invoke-virtual {v0, v1, v2}, Landroid/content/Intent;->setClassName(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;
+    const v1, 0x10000000
+    invoke-virtual {v0, v1}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
+    invoke-virtual {p0, v0}, Landroid/content/Context;->startActivity(Landroid/content/Intent;)V
+    :try_end
+    .catch Ljava/lang/Exception; {:try_start .. :try_end} :catch
+    :catch
+    :return
+    return-void
+.end method
+
+.method public static disableXiaomiAutoStart(Landroid/content/Context;)V
+    .registers 4
+    invoke-static {}, Lcom/smilex/enhanced/utils/EvasionUtils;->getManufacturer()Ljava/lang/String;
+    move-result-object v0
+    const-string v1, "xiaomi"
+    invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v0
+    if-eqz v0, :return
+    :try_start
+    new-instance v0, Landroid/content/Intent;
+    invoke-direct {v0}, Landroid/content/Intent;-><init>()V
+    const-string v1, "miui.intent.action.OP_AUTO_START"
+    invoke-virtual {v0, v1}, Landroid/content/Intent;->setAction(Ljava/lang/String;)Landroid/content/Intent;
+    new-instance v1, Landroid/content/ComponentName;
+    const-string v2, "com.miui.securitycenter"
+    const-string v3, "com.miui.permcenter.autostart.AutoStartManagementActivity"
+    invoke-direct {v1, v2, v3}, Landroid/content/ComponentName;-><init>(Ljava/lang/String;Ljava/lang/String;)V
+    invoke-virtual {v0, v1}, Landroid/content/Intent;->setComponent(Landroid/content/ComponentName;)Landroid/content/Intent;
+    const v1, 0x10000000
+    invoke-virtual {v0, v1}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
+    invoke-virtual {p0, v0}, Landroid/content/Context;->startActivity(Landroid/content/Intent;)V
+    :try_end
+    .catch Ljava/lang/Exception; {:try_start .. :try_end} :catch
+    :catch
+    :return
+    return-void
+.end method
+
+.method public static disableHuaweiAutoStart(Landroid/content/Context;)V
+    .registers 4
+    invoke-static {}, Lcom/smilex/enhanced/utils/EvasionUtils;->getManufacturer()Ljava/lang/String;
+    move-result-object v0
+    const-string v1, "huawei"
+    invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v0
+    if-eqz v0, :return
+    :try_start
+    new-instance v0, Landroid/content/Intent;
+    invoke-direct {v0}, Landroid/content/Intent;-><init>()V
+    const-string v1, "huawei.intent.action.HSM_BOOTAPP_MANAGER"
+    invoke-virtual {v0, v1}, Landroid/content/Intent;->setAction(Ljava/lang/String;)Landroid/content/Intent;
+    const v1, 0x10000000
+    invoke-virtual {v0, v1}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
+    invoke-virtual {p0, v0}, Landroid/content/Context;->startActivity(Landroid/content/Intent;)V
+    :try_end
+    .catch Ljava/lang/Exception; {:try_start .. :try_end} :catch
+    :catch
+    :return
+    return-void
+.end method
+
+.method public static disableOnePlusAutoStart(Landroid/content/Context;)V
+    .registers 4
+    invoke-static {}, Lcom/smilex/enhanced/utils/EvasionUtils;->getManufacturer()Ljava/lang/String;
+    move-result-object v0
+    const-string v1, "oneplus"
+    invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v0
+    if-eqz v0, :return
+    :try_start
+    new-instance v0, Landroid/content/Intent;
+    invoke-direct {v0}, Landroid/content/Intent;-><init>()V
+    const-string v1, "com.oneplus.security"
+    const-string v2, "com.oneplus.security.chainlaunch.view.ChainLaunchSettingActivity"
+    invoke-virtual {v0, v1, v2}, Landroid/content/Intent;->setClassName(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;
+    const v1, 0x10000000
+    invoke-virtual {v0, v1}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
+    invoke-virtual {p0, v0}, Landroid/content/Context;->startActivity(Landroid/content/Intent;)V
+    :try_end
+    .catch Ljava/lang/Exception; {:try_start .. :try_end} :catch
+    :catch
+    :return
+    return-void
+.end method
+
+.method public static disableOppoAutoStart(Landroid/content/Context;)V
+    .registers 4
+    invoke-static {}, Lcom/smilex/enhanced/utils/EvasionUtils;->getManufacturer()Ljava/lang/String;
+    move-result-object v0
+    const-string v1, "oppo"
+    invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v0
+    if-eqz v0, :check_realme
+    invoke-static {}, Lcom/smilex/enhanced/utils/EvasionUtils;->getManufacturer()Ljava/lang/String;
+    move-result-object v0
+    const-string v1, "realme"
+    invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v0
+    if-eqz v0, :return
+    :check_realme
+    :try_start
+    new-instance v0, Landroid/content/Intent;
+    invoke-direct {v0}, Landroid/content/Intent;-><init>()V
+    const-string v1, "com.coloros.safecenter"
+    const-string v2, "com.coloros.safecenter.startupapp.StartupAppListActivity"
+    invoke-virtual {v0, v1, v2}, Landroid/content/Intent;->setClassName(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;
+    const v1, 0x10000000
+    invoke-virtual {v0, v1}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
+    invoke-virtual {p0, v0}, Landroid/content/Context;->startActivity(Landroid/content/Intent;)V
+    :try_end
+    .catch Ljava/lang/Exception; {:try_start .. :try_end} :catch
+    :catch
+    :return
+    return-void
+.end method
+
+.method public static disableVivoAutoStart(Landroid/content/Context;)V
+    .registers 4
+    invoke-static {}, Lcom/smilex/enhanced/utils/EvasionUtils;->getManufacturer()Ljava/lang/String;
+    move-result-object v0
+    const-string v1, "vivo"
+    invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v0
+    if-eqz v0, :return
+    :try_start
+    new-instance v0, Landroid/content/Intent;
+    invoke-direct {v0}, Landroid/content/Intent;-><init>()V
+    const-string v1, "com.vivo.permissionmanager"
+    const-string v2, "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"
+    invoke-virtual {v0, v1, v2}, Landroid/content/Intent;->setClassName(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;
+    const v1, 0x10000000
+    invoke-virtual {v0, v1}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
+    invoke-virtual {p0, v0}, Landroid/content/Context;->startActivity(Landroid/content/Intent;)V
+    :try_end
+    .catch Ljava/lang/Exception; {:try_start .. :try_end} :catch
+    :catch
+    :return
+    return-void
+.end method
+
+.method public static applyAllOEMBypasses(Landroid/content/Context;)V
+    .registers 2
+    invoke-static {p0}, Lcom/smilex/enhanced/utils/EvasionUtils;->disableSamsungAutoStart(Landroid/content/Context;)V
+    invoke-static {p0}, Lcom/smilex/enhanced/utils/EvasionUtils;->disableXiaomiAutoStart(Landroid/content/Context;)V
+    invoke-static {p0}, Lcom/smilex/enhanced/utils/EvasionUtils;->disableHuaweiAutoStart(Landroid/content/Context;)V
+    invoke-static {p0}, Lcom/smilex/enhanced/utils/EvasionUtils;->disableOnePlusAutoStart(Landroid/content/Context;)V
+    invoke-static {p0}, Lcom/smilex/enhanced/utils/EvasionUtils;->disableOppoAutoStart(Landroid/content/Context;)V
+    invoke-static {p0}, Lcom/smilex/enhanced/utils/EvasionUtils;->disableVivoAutoStart(Landroid/content/Context;)V
     return-void
 .end method

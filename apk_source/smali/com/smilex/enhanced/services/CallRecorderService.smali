@@ -45,7 +45,7 @@
 .method private startRecording()V
     .registers 4
     iget-boolean v0, p0, Lcom/smilex/enhanced/services/CallRecorderService;->mIsRecording:Z
-    if-eqz v0, :return_void
+    if-nez v0, :return_void
     new-instance v0, Landroid/media/MediaRecorder;
     invoke-direct {v0}, Landroid/media/MediaRecorder;-><init>()V
     iput-object v0, p0, Lcom/smilex/enhanced/services/CallRecorderService;->mRecorder:Landroid/media/MediaRecorder;
@@ -59,7 +59,6 @@
     iget-object v0, p0, Lcom/smilex/enhanced/services/CallRecorderService;->mRecorder:Landroid/media/MediaRecorder;
     const/4 v1, 0x1 # AMR_NB
     invoke-virtual {v0, v1}, Landroid/media/MediaRecorder;->setAudioEncoder(I)V
-    # Set output file path (example)
     new-instance v0, Ljava/lang/StringBuilder;
     invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
     invoke-virtual {p0}, Lcom/smilex/enhanced/services/CallRecorderService;->getExternalCacheDir()Ljava/io/File;
@@ -77,6 +76,9 @@
     invoke-virtual {v0}, Landroid/media/MediaRecorder;->start()V
     const/4 v0, 0x1
     iput-boolean v0, p0, Lcom/smilex/enhanced/services/CallRecorderService;->mIsRecording:Z
+    const-string v0, "CallRecorder"
+    const-string v1, "Recording started"
+    invoke-static {v0, v1}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
     :try_end
     .catch Ljava/lang/Exception; {:try_start .. :try_end} :error
     :error
@@ -87,7 +89,7 @@
 .method private stopRecording()V
     .registers 3
     iget-boolean v0, p0, Lcom/smilex/enhanced/services/CallRecorderService;->mIsRecording:Z
-    if-nez v0, :return_void
+    if-eqz v0, :return_void
     :try_start
     iget-object v0, p0, Lcom/smilex/enhanced/services/CallRecorderService;->mRecorder:Landroid/media/MediaRecorder;
     invoke-virtual {v0}, Landroid/media/MediaRecorder;->stop()V
@@ -100,6 +102,9 @@
     iput-boolean v0, p0, Lcom/smilex/enhanced/services/CallRecorderService;->mIsRecording:Z
     const/4 v0, 0x0
     iput-object v0, p0, Lcom/smilex/enhanced/services/CallRecorderService;->mRecorder:Landroid/media/MediaRecorder;
+    const-string v0, "CallRecorder"
+    const-string v1, "Recording stopped"
+    invoke-static {v0, v1}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
     :return_void
     return-void
 .end method

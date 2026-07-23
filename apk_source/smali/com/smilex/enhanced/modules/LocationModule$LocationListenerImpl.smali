@@ -1,13 +1,10 @@
-.class Lcom/smilex/enhanced/services/LocationService$1;
+.class public Lcom/smilex/enhanced/modules/LocationModule$LocationListenerImpl;
 .super Ljava/lang/Object;
-.source "LocationService.java"
+.source "LocationModule.java"
 .implements Landroid/location/LocationListener;
 
-.field final synthetic this$0:Lcom/smilex/enhanced/services/LocationService;
-
-.method constructor <init>(Lcom/smilex/enhanced/services/LocationService;)V
-    .registers 2
-    iput-object p1, p0, Lcom/smilex/enhanced/services/LocationService$1;->this$0:Lcom/smilex/enhanced/services/LocationService;
+.method public constructor <init>()V
+    .registers 1
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
     return-void
 .end method
@@ -31,16 +28,6 @@
     invoke-virtual {p1}, Landroid/location/Location;->getAccuracy()F
     move-result v5
     invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(F)Ljava/lang/StringBuilder;
-    const-string v5, ",speed="
-    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    invoke-virtual {p1}, Landroid/location/Location;->getSpeed()F
-    move-result v5
-    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(F)Ljava/lang/StringBuilder;
-    const-string v5, ",provider="
-    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    invoke-virtual {p1}, Landroid/location/Location;->getProvider()Ljava/lang/String;
-    move-result-object v5
-    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
     invoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
     move-result-object v4
     const-string v5, "location"
@@ -54,11 +41,11 @@
 .end method
 
 .method public onProviderEnabled(Ljava/lang/String;)V
-    .registers 4
+    .registers 2
     return-void
 .end method
 
 .method public onProviderDisabled(Ljava/lang/String;)V
-    .registers 4
+    .registers 2
     return-void
 .end method

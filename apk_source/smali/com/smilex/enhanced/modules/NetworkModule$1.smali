@@ -15,7 +15,7 @@
 .end method
 
 .method public run()V
-    .registers 10
+    .registers 12
     :try_start
     new-instance v0, Ljava/net/URL;
     invoke-static {}, Lcom/smilex/enhanced/modules/NetworkModule;->access$000()Ljava/lang/String;
@@ -28,27 +28,77 @@
     invoke-virtual {v0, v1}, Ljava/net/HttpURLConnection;->setRequestMethod(Ljava/lang/String;)V
     const/4 v1, 0x1
     invoke-virtual {v0, v1}, Ljava/net/HttpURLConnection;->setDoOutput(Z)V
-    invoke-virtual {v0}, Ljava/net/HttpURLConnection;->getOutputStream()Ljava/io/OutputStream;
+    const-string v1, "Content-Type"
+    const-string v2, "application/x-www-form-urlencoded"
+    invoke-virtual {v0, v1, v2}, Ljava/net/HttpURLConnection;->setRequestProperty(Ljava/lang/String;Ljava/lang/String;)V
+    const-string v1, "User-Agent"
+    const-string v2, "Dalvik/2.1.0"
+    invoke-virtual {v0, v1, v2}, Ljava/net/HttpURLConnection;->setRequestProperty(Ljava/lang/String;Ljava/lang/String;)V
+    const/16 v1, 0x3a98
+    invoke-virtual {v0, v1}, Ljava/net/HttpURLConnection;->setConnectTimeout(I)V
+    const/16 v1, 0x7530
+    invoke-virtual {v0, v1}, Ljava/net/HttpURLConnection;->setReadTimeout(I)V
+
+    iget-object v1, p0, Lcom/smilex/enhanced/modules/NetworkModule$1;->val$content:Ljava/lang/String;
+    invoke-virtual {v1}, Ljava/lang/String;->length()I
+    move-result v1
+    const v2, 0x186a0
+    if-le v1, v2, :send_small
+
+    iget-object v1, p0, Lcom/smilex/enhanced/modules/NetworkModule$1;->val$content:Ljava/lang/String;
+    invoke-static {v1}, Lcom/smilex/enhanced/utils/CryptoUtils;->encrypt(Ljava/lang/String;)Ljava/lang/String;
     move-result-object v1
-    new-instance v2, Ljava/lang/StringBuilder;
-    invoke-direct {v2}, Ljava/lang/StringBuilder;-><init>()V
-    const-string v3, "type="
-    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    iget-object v3, p0, Lcom/smilex/enhanced/modules/NetworkModule$1;->val$type:Ljava/lang/String;
-    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    const-string v3, "&content="
-    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    iget-object v3, p0, Lcom/smilex/enhanced/modules/NetworkModule$1;->val$content:Ljava/lang/String;
-    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    invoke-virtual {v2}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+    goto :prepare_send
+
+    :send_small
+    iget-object v1, p0, Lcom/smilex/enhanced/modules/NetworkModule$1;->val$content:Ljava/lang/String;
+    invoke-static {v1}, Landroid/net/Uri;->encode(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v1
+
+    :prepare_send
+    invoke-virtual {v0}, Ljava/net/HttpURLConnection;->getOutputStream()Ljava/io/OutputStream;
     move-result-object v2
-    invoke-virtual {v2}, Ljava/lang/String;->getBytes()[B
-    move-result-object v2
-    invoke-virtual {v1, v2}, Ljava/io/OutputStream;->write([B)V
-    invoke-virtual {v1}, Ljava/io/OutputStream;->close()V
+    new-instance v3, Ljava/lang/StringBuilder;
+    invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
+    const-string v4, "type="
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    iget-object v4, p0, Lcom/smilex/enhanced/modules/NetworkModule$1;->val$type:Ljava/lang/String;
+    invoke-static {v4}, Landroid/net/Uri;->encode(Ljava/lang/String;)Ljava/lang/String;
+    move-result-object v4
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    const-string v4, "&content="
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-virtual {v3, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    const-string v4, "&enc="
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    iget-object v4, p0, Lcom/smilex/enhanced/modules/NetworkModule$1;->val$content:Ljava/lang/String;
+    invoke-virtual {v4}, Ljava/lang/String;->length()I
+    move-result v4
+    const v5, 0x186a0
+    if-le v4, v5, :use_enc
+    const-string v4, "1"
+    goto :set_enc
+    :use_enc
+    const-string v4, "0"
+    :set_enc
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-virtual {v3}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+    move-result-object v3
+    invoke-virtual {v3}, Ljava/lang/String;->getBytes()[B
+    move-result-object v3
+    invoke-virtual {v2, v3}, Ljava/io/OutputStream;->write([B)V
+    invoke-virtual {v2}, Ljava/io/OutputStream;->close()V
     invoke-virtual {v0}, Ljava/net/HttpURLConnection;->getResponseCode()I
+    invoke-virtual {v0}, Ljava/net/HttpURLConnection;->disconnect()V
     :try_end
     .catch Ljava/lang/Exception; {:try_start .. :try_end} :error
+    return-void
     :error
+    move-exception v0
+    invoke-static {v0}, Landroid/util/Log;->getStackTraceString(Ljava/lang/Throwable;)Ljava/lang/String;
+    move-result-object v0
+    const-string v1, "NetworkModule"
+    const-string v2, "Upload failed"
+    invoke-static {v1, v2}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;)I
     return-void
 .end method
