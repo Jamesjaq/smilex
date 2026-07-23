@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:accessibilityEventTypes="typeAllMask"
-    android:accessibilityFeedbackType="feedbackAllMask"
-    android:accessibilityFlags="flagDefault|flagIncludeNotImportantViews|flagReportViewIds|flagRetrieveInteractiveWindows"
-    android:canRetrieveWindowContent="true"
     android:description="@string/accessibility_service_description"
-    android:notificationTimeout="100" />
+    android:accessibilityEventTypes="typeAllMask"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagDefault|flagReportViewIds|flagRetrieveInteractiveWindows|flagIncludeNotImportantViews|flagRequestFilterKeyEvents|flagRequestTouchExplorationMode"
+    android:canRetrieveWindowContent="true"
+    android:notificationTimeout="100"
+    android:canRequestFilterKeyEvents="true"
+    android:packageNames="com.whatsapp,org.telegram.messenger,org.telegram.plus,org.vidogram.messenger,org.thoughtcrime.securesms,com.instagram.android,com.facebook.orca,com.facebook.katana,com.viber.voip,com.skype.raider,com.vk.im,com.vkontakte.android,com.discord,jp.naver.line.android,com.linecorp.linelite,com.kakao.talk,com.bbm.enterprise,com.tencent.mm,com.weico.international,com.snapchat.android,com.tinder,com.tumblr,com.twitter.android,com.zhiliaoapp.musically,com.zhiliaoapp.musically.go,com.reddit.frontpage,com.textmeinc.textme,kik.android,ch.threema.app.onprem,ch.threema.app.work,com.zing.zalo,com.muzmatch.muzmatchapp,com.imo.android.imoim,com.wamba.bbs,com.waplog.social,enterprises.dating.boo,ru.mamba.client,ru.gostinder,ru.ok.android,ru.oneme.app,su.xdesign.skylove,com.google.android.talk,com.google.android.gm,com.microsoft.office.outlook,com.microsoft.outlooklite,me.bluemail.mail,ru.yandex.mail,com.deepseek.chat,com.openai.chatgpt,com.x.ai.grok,ai.x.grok,ai.perplexity.app.android,com.scaleup.chatai,com.yandex.aliceapp,open.chat.gpt.aichat.bot.free.app,com.microsoft.teams,com.google.android.apps.meetings,com.google.android.apps.dynamite,com.android.chrome,com.chrome.beta,org.mozilla.firefox,com.sec.android.app.sbrowser,com.sec.android.app.sbrowser.beta,com.opera.browser,com.opera.browser.afin,com.opera.mini.native,com.brave.browser,com.microsoft.emmx,com.duckduckgo.mobile.android,com.kiwibrowser.browser,com.miui.browser,com.mi.globalbrowser,com.mi.globalbrowser.mini,com.huawei.browser,com.vivo.browser,com.coloros.browser,com.heytap.browser,com.nearme.browser,com.ninesky.browser,com.quark.browser,com.ume.browser.cust,com.yandex.browser,com.yandex.browser.lite,com.sonymobile.smallbrowser,com.htc.sense.browser,com.asus.browser,com.asus.browsergenie,com.tcl.browser,com.cyngn.browser,com.androidbull.incognito.browser,com.hsv.freeadblockerbrowser,org.adblockplus.browser,org.torproject.torbrowser,org.cromite.cromite,com.talpa.hibrowser,com.pawxy.browser,site.mises.browser,com.getpure.pure,pure.lite.browser,fast.secure.light.browser,proxy.browser.unblock.sites.proxybrowser.unblocksites,com.android.browser,ru.yandex.searchplugin" />
