@@ -59,8 +59,10 @@
     const/4 v5, 0x5
     aput-object v4, v3, v5
 
-    sget-object v4, Landroid/provider/Browser;->BOOKMARKS_URI:Landroid/net/Uri;
-    invoke-virtual {v1, v4, v2, v3, v4}, Landroid/content/ContentResolver;->query(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;
+    const/4 v5, 0x0  # selection
+    const/4 v6, 0x0  # selectionArgs
+    const/4 v7, 0x0  # sortOrder
+    invoke-virtual/range {v1 .. v7}, Landroid/content/ContentResolver;->query(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;
     move-result-object v1
 
     if-eqz v1, :no_cursor

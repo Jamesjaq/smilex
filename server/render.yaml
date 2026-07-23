@@ -4,3 +4,12 @@ services:
     runtime: python
     buildCommand: pip install -r server/requirements.txt
     startCommand: cd server && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: AUTH_USERNAME
+        value: admin
+        sync: false
+      - key: AUTH_PASSWORD
+        value: changeme
+        sync: false
+      - key: DB_PATH
+        value: smilex.db

