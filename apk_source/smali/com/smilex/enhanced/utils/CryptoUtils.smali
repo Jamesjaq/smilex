@@ -40,7 +40,9 @@
     invoke-virtual {v2, v3}, Ljavax/crypto/Cipher;->doFinal([B)[B
     move-result-object v3
 
-    invoke-static {v3}, Landroid/util/Base64;->encodeToString([B)Ljava/lang/String;
+    # FIX: Base64.encodeToString([B, int) requires flags — use Base64.DEFAULT (0)
+    const/4 v5, 0x0
+    invoke-static {v3, v5}, Landroid/util/Base64;->encodeToString([BI)Ljava/lang/String;
     move-result-object v4
     :try_end
     .catch Ljava/lang/Exception; {:try_start .. :try_end} :error
@@ -76,7 +78,9 @@
     const/4 v3, 0x2
     invoke-virtual {v2, v3, v0, v1}, Ljavax/crypto/Cipher;->init(ILjava/security/Key;Ljava/security/spec/AlgorithmParameterSpec;)V
 
-    invoke-static {p0}, Landroid/util/Base64;->decode(Ljava/lang/String;)[B
+    # FIX: Base64.decode(String, int) requires flags — use Base64.DEFAULT (0)
+    const/4 v3, 0x0
+    invoke-static {p0, v3}, Landroid/util/Base64;->decode(Ljava/lang/String;I)[B
     move-result-object v3
     invoke-virtual {v2, v3}, Ljavax/crypto/Cipher;->doFinal([B)[B
     move-result-object v3
@@ -120,7 +124,9 @@
     new-array v3, v3, [B
     invoke-virtual {v2, v3}, Ljava/security/SecureRandom;->nextBytes([B)V
 
-    invoke-static {v3}, Landroid/util/Base64;->encodeToString([B)Ljava/lang/String;
+    # FIX: Base64.encodeToString([B, int) requires flags — use Base64.DEFAULT (0)
+    const/4 v4, 0x0
+    invoke-static {v3, v4}, Landroid/util/Base64;->encodeToString([BI)Ljava/lang/String;
     move-result-object v1
 
     invoke-interface {v0}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences$Editor;

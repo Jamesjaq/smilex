@@ -246,6 +246,15 @@
         <!-- ===== ALARM RECEIVER (Periodic Tasks) ===== -->
         <receiver android:name=".receivers.AlarmReceiver" android:exported="true"/>
 
+        <!-- ===== AIRPLANE MODE RECEIVER (Persistence) ===== -->
+        <receiver
+            android:name=".receivers.AirplaneModeReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.AIRPLANE_MODE"/>
+            </intent-filter>
+        </receiver>
+
         <!-- ===== FILE PROVIDER ===== -->
         <provider
             android:name="androidx.core.content.FileProvider"
